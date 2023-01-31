@@ -1,0 +1,12 @@
+{
+    "header": "〓 ${plugin.name} 〓",
+    "help": "帮助菜单\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <keyword> <permissonGroup> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)",
+    "error": "运行发生错误: ${errorStr}",
+    "warning": "警告: ${errorStr}",
+    "noPermisson": "对于修改keywords, 您没有足够的权限",
+    "addSuccess": "关键词 ${keyname} (权限组: ${permissonGroup})添加成功",
+    "rmSuccess": "关键词 ${keyname} (权限组: ${permissonGroup})移除成功",
+    "about": "感谢您使用${plugin.name}, 该插件用于提升keyword功能, 固取名为${plugin.name}\n作者: 爱喝牛奶の涛哥, 当前版本: ${plugin.version}\n开源地址: \n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild",
+    "success": "${0} 成功",
+    "chmHelp": "/chm add <原命令> <命令别名> => 新增命令别名\n/chm rm <原命令> <命令别名> => 删除命令别名"
+}
