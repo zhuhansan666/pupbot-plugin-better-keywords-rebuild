@@ -525,8 +525,8 @@ var Listener = {
 
 const plugin = new PupPlugin(TOOLS.getPluginName(name), version)
 plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
-let filename = `./languages/${config.lang}.json`
-filename = fs.existsSync(filename) && fs.lstatSync(filename).isFile() ? filename : `./languages/en-us.json`
+let filename = path.join(__dirname, `./languages/${config.lang}.json`)
+filename = fs.existsSync(filename) && fs.lstatSync(filename).isFile() ? filename : path.join(__dirname, `./languages/${config.lang}.json`)
 const language = require(filename)
 
 plugin.onMounted(() => {
