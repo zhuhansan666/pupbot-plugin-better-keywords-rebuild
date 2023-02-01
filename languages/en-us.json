@@ -1,0 +1,12 @@
+{
+    "header": "〓 ${plugin.name} 〓",
+    "help": "Help menu\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <keyword> <permissonGroup> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)",
+    "error": "ERROR: ${errorStr}",
+    "warning": "WARNING: ${errorStr}",
+    "noPermisson": "You have not permisson",
+    "addSuccess": "Add keyword ${keyname} (permisson group: ${permissonGroup}) success",
+    "rmSuccess": "Remove keyword ${keyname} (permisson group: ${permissonGroup}) success",
+    "about": "Thank you for using ${plugin.name}, This plugin is used to promote 'keyword' functions, so named ${plugin.name}\nAuthor: 爱喝牛奶の涛哥 / LoveMilk-BrotherTao, Now version: ${plugin.version}\nOpen source link: \n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild",
+    "success": "${0} successful",
+    "chmHelp": "/chm add <old command> <command alias> => add command alias for old command\n/chm rm <old command> <command alias> => remove command alias for old command"
+}

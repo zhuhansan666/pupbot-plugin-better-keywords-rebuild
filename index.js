@@ -87,6 +87,9 @@ var TOOLS = {
         } catch (response) {
             return response.response != undefined ? response.response.status : '请求失败'
         }
+    },
+    getImageLink: function(MD5) {
+        return `http://gchat.qpic.cn/gchatpic_new/0/pupbot-0-${MD5.toUpperCase()}/0`
     }
 }
 
@@ -123,7 +126,7 @@ const permissonType = {
     'g': { code: 'global', msg: '所有群聊和私信' },
 }
 const config = {
-    "lang": "zh-cn",
+    "lang": "en-us",
     "keywords": {
         "groups": {},
         "global-g": {},
@@ -138,7 +141,8 @@ const config = {
 }
 
 var Manager = {
-    _checkValueType: function(value) {
+    _checkValueType: function(value, event) {
+        console.log(`${value}, ${value.slice(0, 7)}, ${value[value.length -1 ]}`)
         if (value.includes('?')) { // 如果含有问号
             valueUrl = value.split('?')[0].toLowerCase()
         } else {
@@ -149,20 +153,30 @@ var Manager = {
                 let filename = value.slice(7, value.length) // valueUrl不区分大小写, 为了Linux, 这里使用value
                 let absFilename = path.isAbsolute(filename) ? filename : path.join(botRoot, filename) // 转换绝对路径
                 if (fs.existsSync(absFilename) && fs.lstatSync(absFilename).isFile()) { // 文件存在且是文件而非文件夹
-                    return { type: 'img-file', value: value } // 返回内容
+                    return { value: value, type: 'img-file' } // 返回内容
                 }
             } else if (TOOLS.startWithInArr(valueUrl, urlHearders)) { // 是网络url
-                return { type: 'img', value: value } // 直接返回不判断, 发送消息会判断的
+                return { value: value, type: 'img' } // 直接返回不判断, 发送消息会判断的
             }
             // 如果是疑似文件路径
             let absFilename = path.isAbsolute(value) ? value : path.join(botRoot, value) // 转换绝对路径
             if (fs.existsSync(absFilename) && fs.lstatSync(absFilename).isFile()) { // 文件存在且是文件而非文件夹
-                return { type: 'img-file', value: `file://${value}` } // 返回内容
+                return { value: value, type: 'img-file', } // 返回内容
             } else {
-                return { type: 'text', value: value } // 返回内容
+                return { value: `${value} `, type: 'text' } // 返回内容
             }
+        } else if (value.slice(0, 7) == '{image:' && value[value.length - 1] == '}') { // 如果是QQ的图片
+            try {
+                let imageMD5 = value.slice(7, value.length - 1)
+                let imageUrl = TOOLS.getImageLink(imageMD5)
+                return { value: imageUrl, type: 'img' }
+            } catch (error) {
+                plugin.logger.warn(`get image MD5 error:\n${error.stack}`)
+                return { value: `${value} `, type: 'text' }
+            }
+
         } else {
-            return { type: 'text', value: value } // 返回内容
+            return { value: `${value} `, type: 'text' } // 返回内容
         }
     },
     add: function(name, values, ptype, event) {
@@ -173,7 +187,7 @@ var Manager = {
         let result = []
         for (let i = 0; i < values.length; i++) {
             const item = values[i]
-            let _result = this._checkValueType(item)
+            let _result = this._checkValueType(item, event)
             result.push(_result) // 添加_result
         }
         // 遍历ptype并添加保存配置文件
@@ -187,6 +201,9 @@ var Manager = {
                     ptypesMsg.push(keyname.msg)
                 } else {
                     if (event.message_type == 'group') {
+                        if (config.keywords[keyname.code][event.group_id] == undefined) { // 如果群聊不存在则创建
+                            config.keywords[keyname.code][event.group_id] = {}
+                        }
                         config.keywords[keyname.code][event.group_id][name] = { value: result, extra: {} }
                         ptypesMsg.push(keyname.msg)
                     } else {
@@ -466,7 +483,7 @@ var Listener = {
 const plugin = new PupPlugin(TOOLS.getPluginName(name), version)
 plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
 let filename = `./languages/${config.lang}.json`
-filename = fs.existsSync(filename) && fs.lstatSync(filename).isFile() ? filename : `./languages/zh-cn.json`
+filename = fs.existsSync(filename) && fs.lstatSync(filename).isFile() ? filename : `./languages/en-us.json`
 const language = require(filename)
 
 plugin.onMounted(() => {
