@@ -1,6 +1,6 @@
 {
     "header": "〓 ${plugin.name} 〓",
-    "help": "Help menu\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <keyword> <permissonGroup> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)",
+    "help": "Help menu\n\t/bkw lang [list -> show languages;][set -> set language;][update or flash -> update languages;]\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <keyword> <permissonGroup> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)",
     "error": "ERROR: ${errorStr}",
     "warning": "WARNING: ${errorStr}",
     "noPermisson": "You have not permisson",

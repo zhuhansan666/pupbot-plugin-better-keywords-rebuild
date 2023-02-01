@@ -5,6 +5,8 @@ const { segment } = require("oicq")
 const { PupPlugin, PluginDataDir, axios } = require('@pupbot/core')
 const { name, version } = require('./package.json')
 
+const botRoot = path.join(PluginDataDir, "../../") // 机器人根目录
+
 const authorQQ = 3088420339
 
 const UAheaders = {
@@ -12,6 +14,25 @@ const UAheaders = {
 }
 
 var TOOLS = {
+    getSupportLanguages: function() {
+        try {
+            let workPath = __dirname
+            let files = fs.readdirSync(path.resolve(path.join(workPath, './languages')))
+            let result = []
+            files.forEach((filename) => {
+                let fullFilename = path.join(workPath, path.join('./languages', filename))
+                let _tmparr = filename.split('.')
+                let ext = _tmparr[_tmparr.length - 1]
+                if (fs.statSync(fullFilename).isFile() && ext.toLowerCase() == 'json') {
+                    result.push(filename.replace('.json', ''))
+                }
+            })
+            return result
+        } catch (error) {
+            console.log(error.stack)
+            return []
+        }
+    },
     removeInArray: function(arr, value) {
         for (let index = 0; index < arr.length; index++) {
             if (arr[index] == value) {
@@ -109,14 +130,13 @@ async function hooker(event, params, plugin, func, args) {
         event.reply(msg)
         plugin.logger.error(error)
         try {
-            plugin.bot.sendPrivateMsg(authorQQ, `At ${new Date().getTime()}\nHostname: ${os.hostname()}\nSystem: ${os.platform()} ${os.release()} ${os.arch()}\nCPU: ${os.cpus()[0].model}\nMem: ${os.totalmem() / (1024 ** 3)} Gib\n${error.stack}`)
+            plugin.bot.sendPrivateMsg(authorQQ, `At ${new Date().getTime()}\nPluginname: ${plugin.name}\nHostname: ${os.hostname()}\nSystem: ${os.platform()} ${os.release()} ${os.arch()}\nCPU: ${os.cpus()[0].model}\nMem: ${os.totalmem() / (1024 ** 3)} Gib\n${error.stack}`)
         } catch (error) {
             plugin.logger.error(error)
         }
     }
 }
-
-const botRoot = path.join(PluginDataDir, "../../") // 机器人根目录
+var supportLangeuages = TOOLS.getSupportLanguages()
 const imgExts = ['.png', '.jpg', '.jepg', '.bmp', '.gif', '.webp']
 const urlHearders = ['http://', 'https://']
 const permissonType = {
@@ -290,8 +310,30 @@ var Commands = {
                 } else if (command == 'about') {
                     // this.about(event, params, plugin)
                     Commands.about(event, params, plugin)
+                } else if (command == 'lang') {
+                    secCommand = params[1];
+                    if (secCommand) {
+                        secCommand = secCommand.toLowerCase()
+                        if (secCommand == 'list') { // 支持的语言
+                            event.reply(TOOLS.addHeader(supportLangeuages.join('\n'), language), true)
+                        } else if (secCommand == 'set') {
+                            let tartgetLang = params[2] // 目标语言
+                            if (tartgetLang && supportLangeuages.includes(tartgetLang.toLowerCase())) {
+                                event.reply(TOOLS.addHeader(`设置语言成功: ${tartgetLang}, 请重启插件\nSet language success: ${tartgetLang}, place load plugin!`, language), true)
+                            } else {
+                                event.reply(TOOLS.addHeader(`未知的语言: ${tartgetLang}, 请检查输入是否正确\nUnknown language: ${tartgetLang}, place check the input!`, language), true)
+                            }
+                        } else if (secCommand == 'update' || secCommand == 'flash') {
+                            supportLangeuages = TOOLS.getSupportLanguages()
+                            event.reply(TOOLS.addHeader(`刷新语言成功:\nReflush languages success:\n${supportLangeuages}`, language), true)
+                        } else {
+                            event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', ` 未知的参数: ${secCommand}\nUnknown argv: ${secCommand}`), language), true)
+                        }
+                    } else {
+                        event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `secCommand 不能为空\nsecCommand could not be empty`), language), true)
+                    }
                 } else {
-                    event.reply(TOOLS.addHeader(language.error.replace('${errSting}', `未知的参数: ${command}`), language), true)
+                    event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `未知的参数: ${command}`), language), true)
                     event.reply(TOOLS.addHeader(language.help, language))
                 }
             } else {
@@ -305,7 +347,6 @@ var Commands = {
         event.reply(TOOLS.addHeader(language.about.replace('${plugin.version}', plugin.version).replace('${plugin.name}', plugin.name), language))
     },
     changeCmd: function(event, params, plugin) {
-        throw "这是一个错误"
         if (TOOLS.isAdmin(event, true)) {
             command = params[0]
             if (command) {
@@ -420,7 +461,7 @@ var Listener = {
         let globalValue = config.keywords.global[rawMessage]
         if (globalValue != undefined) {
             try {
-                await Listener._sendMessage(event, globalFriendsValue.value)
+                await Listener._sendMessage(event, globalValue.value)
             } catch (error) {
                 plugin.logger.error(error)
                 event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
@@ -488,6 +529,7 @@ const language = require(filename)
 
 plugin.onMounted(() => {
     plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
+    plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
     plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
     plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
     plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about
