@@ -155,7 +155,7 @@ const config = {
     },
     "commands": {
         '/bkw': ['/bkw'],
-        '/bkwabout': ['/bkwabout', '#bkwabout'],
+        // '/bkwabout': ['/bkwabout', '#bkwabout'],
         '/changeCmd': ['/chm']
     }
 }
@@ -319,6 +319,8 @@ var Commands = {
                         } else if (secCommand == 'set') {
                             let tartgetLang = params[2] // 目标语言
                             if (tartgetLang && supportLangeuages.includes(tartgetLang.toLowerCase())) {
+                                config.lang = tartgetLang
+                                plugin.saveConfig(config)
                                 event.reply(TOOLS.addHeader(`设置语言成功: ${tartgetLang}, 请重启插件\nSet language success: ${tartgetLang}, place load plugin!`, language), true)
                             } else {
                                 event.reply(TOOLS.addHeader(`未知的语言: ${tartgetLang}, 请检查输入是否正确\nUnknown language: ${tartgetLang}, place check the input!`, language), true)
@@ -532,7 +534,7 @@ plugin.onMounted(() => {
     plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
     plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
     plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
-    plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about
+        // plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about
     plugin.onCmd(config.commands['/changeCmd'], (event, params) => hooker(event, params, plugin, Commands.changeCmd))
 })
 

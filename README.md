@@ -51,3 +51,5 @@
 - [x] 在首次创建群聊项时创建群聊子键失败  (由Q '蓝衒' 提供反馈)
 - [x] 在g模式下`globalFriendsValue is not defined`  (由QQ '蓝衒' 提供反馈)\
 - [x] 删除用于调试的错误 `throw '这是一个错误'` (原 Line350)  (本人发现)
+- [x] 修改`/bkwabout`设定以避免刷屏(`about`已移步`/bkw about`)
+- [x] 使用QQ消息指令设置语言无效
