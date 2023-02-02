@@ -190,11 +190,7 @@ const permissonType = {
 
 var Manager = {
     _checkValueType: function(value, event) {
-        if (value.includes('?')) { // 如果含有问号
-            valueUrl = value.split('?')[0].toLowerCase()
-        } else {
-            valueUrl = value.toLowerCase()
-        }
+        valueUrl = value.split('?')[0].toLowerCase()
         if (TOOLS.endWithInArr(valueUrl, imgExts)) { // 如果是图片结尾的后缀
             if (valueUrl.slice(0, 7) == 'file://') { // 是本地文件url
                 let filename = value.slice(7, value.length) // valueUrl不区分大小写, 为了Linux, 这里使用value
