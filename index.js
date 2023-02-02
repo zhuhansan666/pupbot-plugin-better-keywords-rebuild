@@ -31,6 +31,17 @@ const config = {
 const defaultConfig = JSON.parse(JSON.stringify(config))
 
 var TOOLS = {
+    getId: function(string, _split, keep = -1) {
+        let result = []
+        let splitArr = string.split(_split)
+        for (let i = 0; i < splitArr.length; i++) {
+            let item = splitArr[i]
+            if (item.length > 0) {
+                result.push(item.slice(0, item.length + keep))
+            }
+        }
+        return result
+    },
     getSupportLanguages: function() {
         try {
             let workPath = __dirname
@@ -179,7 +190,6 @@ const permissonType = {
 
 var Manager = {
     _checkValueType: function(value, event) {
-        console.log(`${value}`)
         if (value.includes('?')) { // 如果含有问号
             valueUrl = value.split('?')[0].toLowerCase()
         } else {
@@ -203,23 +213,37 @@ var Manager = {
                 return { value: `${value} `, type: 'text' } // 返回内容
             }
         } else if (value.slice(0, 7) == '{image:' && value[value.length - 1] == '}') { // 如果是QQ的图片
-            try {
-                let imageMD5 = value.slice(7, value.length - 1)
-                let imageUrl = TOOLS.getImageLink(imageMD5)
-                return { value: imageUrl, type: 'img' }
-            } catch (error) {
-                plugin.logger.warn(`get image MD5 error:\n${error.stack}`)
-                return { value: `${value} `, type: 'text' }
+            let result = { value: [], type: 'img' }
+            let imageMD5s = TOOLS.getId(value, '{image:')
+            for (let i = 0; i < imageMD5s.length; i++) {
+                let imageUrl = TOOLS.getImageLink(imageMD5s[i])
+                result.value.push(imageUrl)
             }
+            return result
         } else if (value.slice(0, 6) == "{face:" && value[value.length - 1] == "}") {
-            let faceId = value.slice(6, value.length - 1)
-            return { value: faceId, type: 'face' }
+            let result = { value: [], type: 'face' }
+            let faces = TOOLS.getId(value, '{face:')
+            for (let i = 0; i < faces.length; i++) {
+                let faceId = faces[i]
+                result.value.push(faceId)
+            }
+            return result
         } else if (value.slice(0, 7) == "{bface:" && value[value.length - 1] == "}") {
-            let bfaceId = value.slice(7, value.length - 1)
-            return { value: bfaceId, type: 'bface' }
+            let result = { value: bfaceId, type: 'bface' }
+            let bfaces = TOOLS.getId(value, '{bface:')
+            for (let i = 0; i < bfaces.length; i++) {
+                let bfaceId = bfaces[i]
+                result.value.push(bfaceId)
+            }
+            return result
         } else if (value.slice(0, 7) == "{sface:" && value[value.length - 1] == "}") {
-            let sfaceId = value.slice(7, value.length - 1)
-            return { value: sfaceId, type: 'sface' }
+            let result = { value: sfaceId, type: 'sface' }
+            let sfaces = TOOLS.getId(value, '{sface:')
+            for (let i = 0; i < sfaces.length; i++) {
+                let sfaceId = sfaces[i]
+                result.value.push(sfaceId)
+            }
+            return result
         } else {
             return { value: `${value} `, type: 'text' } // 返回内容
         }
@@ -324,7 +348,6 @@ var Commands = {
                     }
                 } else if (command == 'rm') {
                     let [_, keyname, permisson] = params
-                    console.log(keyname, permisson)
                     if (keyname && permisson) {
                         if (permisson == '*') {
                             permisson = 'pufg'
@@ -443,12 +466,25 @@ var Listener = {
             const item = value[i];
             if (TOOLS.isJsonObject(item)) {
                 if (item.type == 'img') {
-                    let statusCode = await (TOOLS.getStatusCode(item.value))
-                    if (typeof statusCode == 'number' && statusCode >= 200 && statusCode < 400) {
-                        result.push(segment.image(item.value, headers = UAheaders))
+                    if (item.value.constructor == Array) {
+                        for (let i = 0; i < item.value.length; i++) {
+                            let imageUrl = item.value[i];
+                            let statusCode = await (TOOLS.getStatusCode(imageUrl))
+                            if (typeof statusCode == 'number' && statusCode >= 200 && statusCode < 400) {
+                                result.push(segment.image(imageUrl, headers = UAheaders))
+                            } else {
+                                errors.push(`Image ${imageUrl} requests failed(status code: ${statusCode}), not add to message, plece check the url before next time.`)
+                                plugin.logger.warn(`Image ${imageUrl} requests failed(status code: ${statusCode}), not add to message, plece check the url before next time.`)
+                            }
+                        }
                     } else {
-                        errors.push(`Image ${item.value} requests failed(status code: ${statusCode}), not add to message, plece check the url before next time.`)
-                        plugin.logger.warn(`Image ${item.value} requests failed(status code: ${statusCode}), not add to message, plece check the url before next time.`)
+                        let statusCode = await (TOOLS.getStatusCode(item.value))
+                        if (typeof statusCode == 'number' && statusCode >= 200 && statusCode < 400) {
+                            result.push(segment.image(item.value, headers = UAheaders))
+                        } else {
+                            errors.push(`Image ${item.value} requests failed(status code: ${statusCode}), not add to message, plece check the url before next time.`)
+                            plugin.logger.warn(`Image ${item.value} requests failed(status code: ${statusCode}), not add to message, plece check the url before next time.`)
+                        }
                     }
                 } else if (item.type == 'img-file') {
                     let filename = item.value.slice(7, item.value.length) // valueUrl不区分大小写, 为了Linux, 这里使用value
@@ -460,12 +496,26 @@ var Listener = {
                         plugin.logger.warn(`Image ${item.value}(absPath: ${absFilename}) not found, plece check the filepath && filename before next time.`)
                     }
                 } else if (item.type == 'face') {
-                    result.push(segment.face(item.value))
+                    if (item.value.constructor == Array) {
+                        for (let i = 0; i < item.value.length; i++) {
+                            let face = item.value[i];
+                            result.push(segment.face(face))
+                        }
+                    } else {
+                        result.push(segment.face(item.value))
+                    }
                 } else if (item.type == 'bface') {
                     result.push(`[暂不支持]{bface: ${item.value}}`)
                         // result.push(segment.bface(text = item.value))
                 } else if (item.type == 'sface') {
-                    result.push(segment.sface(item.value))
+                    if (item.value.constructor == Array) {
+                        for (let i = 0; i < item.value.length; i++) {
+                            let sface = item.value[i];
+                            result.push(segment.sface(sface))
+                        }
+                    } else {
+                        result.push(segment.sface(item.value))
+                    }
                 } else if (item.type == 'text') {
                     result.push(item.value)
                 } else {
