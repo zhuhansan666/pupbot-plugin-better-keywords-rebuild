@@ -13,6 +13,23 @@ const UAheaders = {
     "user-agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.70`
 }
 
+const config = {
+    "lang": "en-us",
+    "keywords": {
+        "groups": {},
+        "global-g": {},
+        "global-f": {},
+        "global": {}
+    },
+    "commands": {
+        '/bkw': ['/bkw'],
+        // '/bkwabout': ['/bkwabout', '#bkwabout'],
+        '/changeCmd': ['/chm', '/alias']
+    }
+}
+
+const defaultConfig = JSON.parse(JSON.stringify(config))
+
 var TOOLS = {
     getSupportLanguages: function() {
         try {
@@ -111,6 +128,18 @@ var TOOLS = {
     },
     getImageLink: function(MD5) {
         return `http://gchat.qpic.cn/gchatpic_new/0/pupbot-0-${MD5.toUpperCase()}/0`
+    },
+    reloadConfig(_config, _defaultConfig) {
+        let keys = Object.keys(_config)
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i]
+            let value = _config[key]
+            if (this.isJsonObject(value) && !value.constructor === Array) {
+                if (defaultConfig[key] != undefined) {
+                    Object.assign(value, defaultConfig[key])
+                }
+            }
+        }
     }
 }
 
@@ -118,51 +147,39 @@ async function hooker(event, params, plugin, func, args) {
     /**
      * 本函数用于hook错误, 在发生错误时发送错误信息到qq
      */
+    let funcname = '[Unknown]'
     try {
         await func(event, params, plugin, args)
     } catch (error) {
         try {
-            var funcname = func.name
+            funcname = func.name
         } catch (err) {
-            var funcname = undefined
+            funcname = '[Unknown]'
         }
-        const msg = `〓 糟糕！${plugin.name}运行"${funcname}"发生错误, 请您坐和放宽, 下面是详细错误信息(好东西就要莱纳~) 〓\n${error.stack}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 ${plugin.name}:bug)`
+        let msg = `〓 糟糕！${plugin.name}运行"${funcname}"发生错误, 请您坐和放宽, 下面是详细错误信息(好东西就要莱纳~) 〓\n${error.stack}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 ${plugin.name}:bug)`
         event.reply(msg)
         plugin.logger.error(error)
         try {
-            plugin.bot.sendPrivateMsg(authorQQ, `At ${new Date().getTime()}\nPluginname: ${plugin.name}\nHostname: ${os.hostname()}\nSystem: ${os.platform()} ${os.release()} ${os.arch()}\nCPU: ${os.cpus()[0].model}\nMem: ${os.totalmem() / (1024 ** 3)} Gib\n${error.stack}`)
+            plugin.bot.sendPrivateMsg(authorQQ, `At ${new Date().getTime()}, funcname ${funcname}()\nbotQQ: ${plugin.bot.nickname} (${plugin.bot.uin})\nmainAdmin: ${await (await plugin.bot.getStrangerInfo(plugin.mainAdmin)).nickname} (${plugin.mainAdmin})\nPluginname: ${plugin.name}\nHostname: ${os.hostname()}\nSystem: ${os.platform()} ${os.release()} ${os.arch()}\nCPU: ${os.cpus()[0].model}\nMem: ${os.totalmem() / (1024 ** 3)} Gib\n${error.stack}`)
         } catch (error) {
             plugin.logger.error(error)
         }
     }
 }
+
 var supportLangeuages = TOOLS.getSupportLanguages()
 const imgExts = ['.png', '.jpg', '.jepg', '.bmp', '.gif', '.webp']
 const urlHearders = ['http://', 'https://']
 const permissonType = {
-    'p': { code: 'groups', msg: '当前群聊' },
-    'u': { code: 'global-g', msg: '所有群聊' },
-    'f': { code: 'global-f', msg: '所有私信' },
-    'g': { code: 'global', msg: '所有群聊和私信' },
-}
-const config = {
-    "lang": "en-us",
-    "keywords": {
-        "groups": {},
-        "global-g": {},
-        "global-f": {},
-        "global": {}
-    },
-    "commands": {
-        '/bkw': ['/bkw'],
-        // '/bkwabout': ['/bkwabout', '#bkwabout'],
-        '/changeCmd': ['/chm']
-    }
+    'p': { code: 'groups', msg: { 'zh-cn': '当前群聊', 'en-us': 'this group' } },
+    'u': { code: 'global-g', msg: { 'zh-cn': '所有群聊', 'en-us': 'all groups' } },
+    'f': { code: 'global-f', msg: { 'zh-cn': '所有私信', 'en-us': 'all friends' } },
+    'g': { code: 'global', msg: { 'zh-cn': '所有群聊和私信', 'en-us': 'all groups and friends(global)' } },
 }
 
 var Manager = {
     _checkValueType: function(value, event) {
-        console.log(`${value}, ${value.slice(0, 7)}, ${value[value.length -1 ]}`)
+        console.log(`${value}`)
         if (value.includes('?')) { // 如果含有问号
             valueUrl = value.split('?')[0].toLowerCase()
         } else {
@@ -194,7 +211,15 @@ var Manager = {
                 plugin.logger.warn(`get image MD5 error:\n${error.stack}`)
                 return { value: `${value} `, type: 'text' }
             }
-
+        } else if (value.slice(0, 6) == "{face:" && value[value.length - 1] == "}") {
+            let faceId = value.slice(6, value.length - 1)
+            return { value: faceId, type: 'face' }
+        } else if (value.slice(0, 7) == "{bface:" && value[value.length - 1] == "}") {
+            let bfaceId = value.slice(7, value.length - 1)
+            return { value: bfaceId, type: 'bface' }
+        } else if (value.slice(0, 7) == "{sface:" && value[value.length - 1] == "}") {
+            let sfaceId = value.slice(7, value.length - 1)
+            return { value: sfaceId, type: 'sface' }
         } else {
             return { value: `${value} `, type: 'text' } // 返回内容
         }
@@ -218,14 +243,16 @@ var Manager = {
             if (keyname != undefined) {
                 if (keyname.code != 'groups') {
                     config.keywords[keyname.code][name] = { value: result, extra: {} }
-                    ptypesMsg.push(keyname.msg)
+                    let msg = keyname.msg[config.lang]
+                    ptypesMsg.push(msg != undefined ? msg : keyname.msg[defaultConfig.lang])
                 } else {
                     if (event.message_type == 'group') {
                         if (config.keywords[keyname.code][event.group_id] == undefined) { // 如果群聊不存在则创建
                             config.keywords[keyname.code][event.group_id] = {}
                         }
                         config.keywords[keyname.code][event.group_id][name] = { value: result, extra: {} }
-                        ptypesMsg.push(keyname.msg)
+                        let msg = keyname.msg[config.lang]
+                        ptypesMsg.push(msg != undefined ? msg : keyname.msg[defaultConfig.lang])
                     } else {
                         event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', '无法在私聊添加/修改当前群聊项'), language))
                     }
@@ -248,11 +275,13 @@ var Manager = {
             if (keyname != undefined) {
                 if (keyname.code != 'groups') {
                     delete config.keywords[keyname.code][name]
-                    ptypesMsg.push(keyname.msg)
+                    let msg = keyname.msg[config.lang]
+                    ptypesMsg.push(msg != undefined ? msg : keyname.msg[defaultConfig.lang])
                 } else {
                     if (event.message_type == 'group') {
                         delete config.keywords[keyname.code][event.group_id][name]
-                        ptypesMsg.push(keyname.msg)
+                        let msg = keyname.msg[config.lang]
+                        ptypesMsg.push(msg != undefined ? msg : keyname.msg[defaultConfig.lang])
                         if (JSON.stringify(config.keywords[keyname.code][event.group_id]) == "{}") {
                             delete config.keywords[keyname.code][event.group_id]
                         }
@@ -281,7 +310,8 @@ var Commands = {
                     let [_, keyname, permisson] = params
                     let info = (params.slice(3, params.length))
                     if (keyname && permisson && info) {
-                        plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
+                        // plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
+                        reloadConfig()
                         if (permisson == '*') {
                             permisson = 'pufg'
                         }
@@ -299,7 +329,8 @@ var Commands = {
                         if (permisson == '*') {
                             permisson = 'pufg'
                         }
-                        plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
+                        // plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
+                        reloadConfig()
                         let permissonGroups = Manager.remove(keyname, permisson, event)
                         plugin.saveConfig(config) // 保存配置文件
                         event.reply(TOOLS.addHeader(language.rmSuccess.replace('${keyname}', keyname).replace('${permissonGroup}', permissonGroups), language), true)
@@ -321,7 +352,8 @@ var Commands = {
                             if (tartgetLang && supportLangeuages.includes(tartgetLang.toLowerCase())) {
                                 config.lang = tartgetLang
                                 plugin.saveConfig(config)
-                                event.reply(TOOLS.addHeader(`设置语言成功: ${tartgetLang}, 请重启插件\nSet language success: ${tartgetLang}, place load plugin!`, language), true)
+                                reloadlanguage()
+                                event.reply(TOOLS.addHeader(`设置语言成功: ${tartgetLang}, 已立即生效\nSet language success: ${tartgetLang}, language took effect.`, language), true)
                             } else {
                                 event.reply(TOOLS.addHeader(`未知的语言: ${tartgetLang}, 请检查输入是否正确\nUnknown language: ${tartgetLang}, place check the input!`, language), true)
                             }
@@ -427,6 +459,13 @@ var Listener = {
                         errors.push(`Image ${item.value}(absPath: ${absFilename}) not found, plece check the filepath && filename before next time.`)
                         plugin.logger.warn(`Image ${item.value}(absPath: ${absFilename}) not found, plece check the filepath && filename before next time.`)
                     }
+                } else if (item.type == 'face') {
+                    result.push(segment.face(item.value))
+                } else if (item.type == 'bface') {
+                    result.push(`[暂不支持]{bface: ${item.value}}`)
+                        // result.push(segment.bface(text = item.value))
+                } else if (item.type == 'sface') {
+                    result.push(segment.sface(item.value))
                 } else if (item.type == 'text') {
                     result.push(item.value)
                 } else {
@@ -524,18 +563,33 @@ var Listener = {
 }
 
 const plugin = new PupPlugin(TOOLS.getPluginName(name), version)
-plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
-let filename = path.join(__dirname, `./languages/${config.lang}.json`)
-filename = fs.existsSync(filename) && fs.lstatSync(filename).isFile() ? filename : path.join(__dirname, `./languages/${config.lang}.json`)
-const language = require(filename)
+var language = require(path.join(__dirname, `./languages/en-us.json`))
+
+function reloadConfig() {
+    plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
+    TOOLS.reloadConfig(config, defaultConfig)
+}
+
+function reloadlanguage() {
+    let filename = path.join(__dirname, `./languages/${config.lang}.json`)
+    filename = fs.existsSync(filename) && fs.lstatSync(filename).isFile() ? filename : path.join(__dirname, `./languages/${config.lang}.json`)
+    language = require(filename)
+}
+reloadConfig()
+reloadlanguage()
 
 plugin.onMounted(() => {
-    plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
-    plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
-    plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
-    plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
-        // plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about
-    plugin.onCmd(config.commands['/changeCmd'], (event, params) => hooker(event, params, plugin, Commands.changeCmd))
+    try {
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
+        plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
+        plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
+            // plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about
+        plugin.onCmd(config.commands['/changeCmd'], (event, params) => hooker(event, params, plugin, Commands.changeCmd))
+    } catch (error) {
+        plugin.logger.error(error)
+        console.log(`${plugin.name}.onMounted Error: ${error.stack}`)
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, `${plugin.name}.onMounted Error: ${error.stack}`)
+    }
 })
 
 module.exports = { plugin }
