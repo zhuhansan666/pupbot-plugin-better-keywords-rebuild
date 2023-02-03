@@ -600,7 +600,7 @@ var Listener = {
         let globalValue = config.keywords.global[rawMessage]
         if (globalValue != undefined) {
             try {
-                await Listener._sendMessage(event, globalFriendsValue.value)
+                await Listener._sendMessage(event, globalValue.value)
             } catch (error) {
                 plugin.logger.error(error)
                 event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
@@ -642,8 +642,8 @@ plugin.onMounted(() => {
         plugin.onCmd(config.commands['/changeCmd'], (event, params) => hooker(event, params, plugin, Commands.changeCmd))
     } catch (error) {
         plugin.logger.error(error)
-        console.log(`${plugin.name}.onMounted Error: ${error.stack}`)
-        plugin.bot.sendPrivateMsg(plugin.mainAdmin, `${plugin.name}.onMounted Error: ${error.stack}`)
+        console.log(`At ${plugin.name}.onMounted Error: ${error.stack}`)
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, `At ${plugin.name}.onMounted Error: ${error.stack}`)
     }
 })
 
