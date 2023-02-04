@@ -8,5 +8,10 @@
     "rmSuccess": "Remove keyword ${keyname} (permisson group: ${permissonGroup}) success",
     "about": "Thank you for using ${plugin.name}, This plugin is used to promote 'keyword' functions, so named ${plugin.name}\nAuthor: 爱喝牛奶の涛哥 / LoveMilk-BrotherTao, Now version: ${plugin.version}\nOpen source link: \n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild",
     "success": "${0} successful",
-    "chmHelp": "/alias add <old command> <command alias> => add command alias for old command\n/alias rm <old command> <command alias> => remove command alias for old command"
+    "chmHelp": "/alias add <old command> <command alias> => add command alias for old command\n/alias rm <old command> <command alias> => remove command alias for old command",
+    "updater": {
+        "try": "try to update plugin (${vnow} -> ${latest})\nIt will auto reload when install update successful",
+        "disableFailed": "Reload plugin disable it error: ${e}",
+        "enableFailed": "Reload plugin enable it error: ${e}"
+    }
 }

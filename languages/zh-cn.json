@@ -8,5 +8,10 @@
     "rmSuccess": "关键词 ${keyname} (权限组: ${permissonGroup})移除成功",
     "about": "感谢您使用${plugin.name}, 该插件用于提升keyword功能, 固取名为${plugin.name}\n作者: 爱喝牛奶の涛哥, 当前版本: ${plugin.version}\n开源地址: \n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild",
     "success": "${0} 成功",
-    "chmHelp": "/alias add <原命令> <命令别名> => 新增命令别名\n/alias rm <原命令> <命令别名> => 删除命令别名"
+    "chmHelp": "/alias add <原命令> <命令别名> => 新增命令别名\n/alias rm <原命令> <命令别名> => 删除命令别名",
+    "updater": {
+        "try": "尝试更新插件 (${vnow} -> ${latest})\n将会在更新完成后自动重载",
+        "disableFailed": "重载插件禁用时出错: ${e}",
+        "enableFailed": "重载插件启用时出错: ${e}"
+    }
 }

@@ -2,11 +2,11 @@ const fs = require('node:fs')
 const os = require('node:os')
 const path = require('path')
 const { segment } = require("oicq")
-const { PupPlugin, PluginDataDir, axios } = require('@pupbot/core')
+const { disablePlugin, enablePlugin, install, NodeModulesDir, PupPlugin, PluginDataDir, PupConf, axios } = require('@pupbot/core')
 const { name, version } = require('./package.json')
 
+const versionApi = `https://registry.npmjs.org/${name}`
 const botRoot = path.join(PluginDataDir, "../../") // 机器人根目录
-
 const authorQQ = 3088420339
 
 const UAheaders = {
@@ -140,7 +140,7 @@ var TOOLS = {
     getImageLink: function(MD5) {
         return `http://gchat.qpic.cn/gchatpic_new/0/pupbot-0-${MD5.toUpperCase()}/0`
     },
-    reloadConfig(_config, _defaultConfig) {
+    reloadConfig: function(_config, _defaultConfig) {
         let keys = Object.keys(_config)
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i]
@@ -151,6 +151,24 @@ var TOOLS = {
                 }
             }
         }
+    },
+    checkVersion: function(latest, thisVer) {
+        let _arr = latest.toString().split('.')
+        let _this = thisVer.toString().split('.')
+        for (let i = 0; i < _arr.length; i++) {
+            if (typeof _arr[i] == "number") {
+                try {
+                    if (_this[i] < _arr[i]) {
+                        return false
+                    }
+                } catch (error) {
+                    plugin.logger.warn(`Compare version warn: ${error.stack}`)
+                }
+            } else {
+                plugin.logger.warn(`Compare version warn: ${_arr[i]} is not a number`)
+            }
+        }
+        return true
     }
 }
 
@@ -376,8 +394,8 @@ var Commands = {
                         if (secCommand == 'list') { // 支持的语言
                             event.reply(TOOLS.addHeader(supportLangeuages.join('\n'), language), true)
                         } else if (secCommand == 'set') {
-                            let tartgetLang = params[2] // 目标语言
-                            if (tartgetLang && supportLangeuages.includes(tartgetLang.toLowerCase())) {
+                            let tartgetLang = params[2].toLowerCase().replace('_', '-') // 目标语言(不区分大小写和_-)
+                            if (tartgetLang && supportLangeuages.includes(tartgetLang)) {
                                 config.lang = tartgetLang
                                 plugin.saveConfig(config)
                                 reloadlanguage()
@@ -617,6 +635,62 @@ var Listener = {
     }
 }
 
+var Update = {
+    checker: async function() {
+        let latestVersion = "0.0.0"
+        let { data } = await (axios.get(versionApi, headers = UAheaders))
+        try {
+            latestVersion = data['dist-tags'].latest
+                // latestVersion = "114514.1.1" // dubug
+        } catch (error) {
+            plugin.logger.warn(`Get latest version warn: ${error.stack}`)
+        }
+        if (TOOLS.checkVersion(latestVersion, version)) { // 是最新版本退出
+            return
+        }
+
+        let msg = TOOLS.addHeader(
+            language.updater.try.replace('${vnow}', version).replace('${latest}', latestVersion), language)
+        plugin.logger.info(msg)
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+
+        try {
+            await Update.reInstall()
+        } catch (error) {
+            plugin.logger.warn(`reInstall(update) pkg warn: ${error.stack}`)
+        }
+    },
+    reInstall: async function(pkg, reload = true) {
+        let result = await install(pkg)
+
+        if (!result) {
+            return false
+        }
+
+        if (!reload) { // 不重加载直接退出
+            return true
+        }
+
+        Update.reloadPlugin(plugin, path.join(NodeModulesDir, name)) // 重加载插件
+
+    },
+    reloadPlugin: async function(plugin, ppath) {
+        let disableResult = await disablePlugin(plugin.bot, PupConf, plugin, ppath)
+        if (!(disableResult === true)) {
+            let = TOOLS.addHeader(language.updater.disableFailed.replace('${e}', disableResult), language)
+            console.log(msg)
+            plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+        }
+        let enableResult = await enablePlugin(plugin.bot, PupConf, ppath)
+        if (!(enableResult === true)) {
+            let msg = TOOLS.addHeader(language.updater.enableFailed.replace('${e}', enableResult, language))
+            console.log(msg)
+            plugin.logger.error(msg)
+            plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+        }
+    }
+}
+
 const plugin = new PupPlugin(TOOLS.getPluginName(name), version)
 var language = require(path.join(__dirname, `./languages/en-us.json`))
 
@@ -636,6 +710,7 @@ reloadlanguage()
 plugin.onMounted(() => {
     try {
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
+        plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker()))
         plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
         plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
             // plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about
