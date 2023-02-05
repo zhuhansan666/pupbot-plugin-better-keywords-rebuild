@@ -1,3 +1,5 @@
+const debug = false
+
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('path')
@@ -157,7 +159,7 @@ var TOOLS = {
         let _this = thisVer.toString().split('.')
         for (let i = 0; i < _arr.length; i++) {
             try {
-                if (_this[i] < _arr[i]) {
+                if (parseInt(_this[i]) < parseInt(_arr[i])) {
                     return false
                 }
             } catch (error) {
@@ -638,33 +640,44 @@ var Listener = {
 
 var Update = {
     checker: async function() {
+        plugin.logger.debug(`try to check version`)
         let latestVersion = "0.0.0"
         let { data } = await (axios.get(versionApi, headers = UAheaders))
         try {
             latestVersion = data['dist-tags'].latest
-                // latestVersion = "114514.1.1" // dubug
+            if (debug) {
+                latestVersion = "114514.1918.1" // dubug
+            }
         } catch (error) {
-            plugin.logger.warn(`Get latest version warn: ${error.stack}`)
+            plugin.logger.warn(`get latest version warn: ${error.stack}`)
         }
         if (TOOLS.checkVersion(latestVersion, version)) { // 是最新版本退出
+            plugin.logger.debug(`is the latest version. this: ${version} latest: ${latestVersion}`)
             return
         }
 
         let msg = TOOLS.addHeader(
-            language.updater.try.replace('${vnow}', version).replace('${latest}', latestVersion), language)
-        plugin.logger.info(msg)
+                language.updater.try.replace('${vnow}', version).replace('${latest}', latestVersion), language)
+            // plugin.logger.info(msg)
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+        plugin.logger.debug(`${msg}`)
 
         try {
-            await Update.reInstall()
+            let status = await Update.reInstall(name)
+            if (!status) {
+                plugin.logger.warn(`↑↑↑reInstall(update) pkg failed↑↑↑`)
+            }
         } catch (error) {
             plugin.logger.warn(`reInstall(update) pkg warn: ${error.stack}`)
         }
+
     },
     reInstall: async function(pkg, reload = true) {
         let result = await install(pkg)
 
         if (!result) {
+            plugin.logger.warn(language.updater.updateFailed)
+            plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader(language.updater.updateFailed, language))
             return false
         }
 
@@ -672,23 +685,30 @@ var Update = {
             return true
         }
 
-        Update.reloadPlugin(plugin, path.join(NodeModulesDir, name)) // 重加载插件
+        let status = Update.reloadPlugin(plugin, path.join(NodeModulesDir, name)) // 重加载插件
+        if (!status) {
+            return false
+        }
 
+        return true
     },
-    reloadPlugin: async function(plugin, ppath) {
-        let disableResult = await disablePlugin(plugin.bot, PupConf, plugin, ppath)
+    reloadPlugin: async function(pname, ppath) {
+        const _bot = plugin.bot
+        let mainAdmin = plugin.mainAdmin
+        let disableResult = await disablePlugin(_bot, PupConf, pname, ppath)
         if (!(disableResult === true)) {
             let = TOOLS.addHeader(language.updater.disableFailed.replace('${e}', disableResult), language)
-            console.log(msg)
-            plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+            _bot.sendPrivateMsg(mainAdmin, msg)
+            return false
         }
-        let enableResult = await enablePlugin(plugin.bot, PupConf, ppath)
+        let enableResult = await enablePlugin(_bot, PupConf, ppath)
         if (!(enableResult === true)) {
-            let msg = TOOLS.addHeader(language.updater.enableFailed.replace('${e}', enableResult, language))
-            console.log(msg)
+            let msg = TOOLS.addHeader(language.updater.enableFailed.replace('${e}', enableResult), language)
             plugin.logger.error(msg)
-            plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+            _bot.sendPrivateMsg(mainAdmin, msg)
+            return false
         }
+        _bot.sendPrivateMsg(mainAdmin, TOOLS.addHeader(language.updater.updateSuccess, language))
     }
 }
 
@@ -709,9 +729,10 @@ reloadConfig()
 reloadlanguage()
 
 plugin.onMounted(() => {
+    hooker(null, null, null, Update.checker) // check update when plugin start
     try {
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
-        plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker()))
+        plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
         plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
         plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
             // plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about

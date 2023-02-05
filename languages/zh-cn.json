@@ -10,8 +10,10 @@
     "success": "${0} 成功",
     "chmHelp": "/alias add <原命令> <命令别名> => 新增命令别名\n/alias rm <原命令> <命令别名> => 删除命令别名",
     "updater": {
-        "try": "尝试更新插件 (${vnow} -> ${latest})\n将会在更新完成后自动重载",
+        "try": "尝试更新插件 (${vnow} -> ${latest})\n将会在更新完成后自动重载(出错会自动提示)",
+        "updateFailed": "更新插件时出错, 详情见错误日志",
         "disableFailed": "重载插件禁用时出错: ${e}",
-        "enableFailed": "重载插件启用时出错: ${e}"
+        "enableFailed": "重载插件启用时出错: ${e}",
+        "updateSuccess": "插件更新成功"
     }
 }

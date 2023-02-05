@@ -10,8 +10,10 @@
     "success": "${0} successful",
     "chmHelp": "/alias add <old command> <command alias> => add command alias for old command\n/alias rm <old command> <command alias> => remove command alias for old command",
     "updater": {
-        "try": "try to update plugin (${vnow} -> ${latest})\nIt will auto reload when install update successful",
+        "try": "try to update plugin (${vnow} -> ${latest})\nIt will auto reload when install update successful(If error in this, it will auto send message to you)",
+        "updateFailed": "Try to update plugin error, see the error log for details",
         "disableFailed": "Reload plugin disable it error: ${e}",
-        "enableFailed": "Reload plugin enable it error: ${e}"
+        "enableFailed": "Reload plugin enable it error: ${e}",
+        "updateSuccess": "Plugin update success"
     }
 }
