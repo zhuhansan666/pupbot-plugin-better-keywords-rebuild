@@ -271,10 +271,18 @@ var Manager = {
             }
             return result
         } else {
+            if (value == '+f') {
+                return { fuzzy: true }
+            } else if (value == '-f') {
+                return { fuzzy: false }
+            }
             return { value: `${value} `, type: 'text' } // 返回内容
         }
     },
-    add: function(name, values, ptype, event) {
+    add: function(name, values, ptype, event, extar) {
+        extar = extar != undefined ? extar : {}
+        let resultJson = { value: [], extra: extar }
+
         if (typeof values == "string") { // 如果values是string转为arr
             values = [values]
         }
@@ -283,8 +291,15 @@ var Manager = {
         for (let i = 0; i < values.length; i++) {
             const item = values[i]
             let _result = this._checkValueType(item, event)
-            result.push(_result) // 添加_result
+            if (_result.value != undefined && _result.type != undefined) {
+                result.push(_result) // 添加_result
+            } else { // 添加附加项
+                for (let _key in _result) {
+                    resultJson.extra[_key] = _result[_key]
+                }
+            }
         }
+
         // 遍历ptype并添加保存配置文件
         let ptypesMsg = []
         let unknownP = []
@@ -292,7 +307,8 @@ var Manager = {
             keyname = permissonType[ptype[i]]
             if (keyname != undefined) {
                 if (keyname.code != 'groups') {
-                    config.keywords[keyname.code][name] = { value: result, extra: {} }
+                    resultJson.value = result
+                    config.keywords[keyname.code][name] = resultJson
                     let msg = keyname.msg[config.lang]
                     ptypesMsg.push(msg != undefined ? msg : keyname.msg[defaultConfig.lang])
                 } else {
@@ -300,7 +316,8 @@ var Manager = {
                         if (config.keywords[keyname.code][event.group_id] == undefined) { // 如果群聊不存在则创建
                             config.keywords[keyname.code][event.group_id] = {}
                         }
-                        config.keywords[keyname.code][event.group_id][name] = { value: result, extra: {} }
+                        resultJson.value = result
+                        config.keywords[keyname.code][event.group_id][name] = resultJson
                         let msg = keyname.msg[config.lang]
                         ptypesMsg.push(msg != undefined ? msg : keyname.msg[defaultConfig.lang])
                     } else {
@@ -484,6 +501,14 @@ var Commands = {
 }
 
 var Listener = {
+    _sendMessageTry: async function(event, value) {
+        try {
+            await Listener._sendMessage(event, value)
+        } catch (error) {
+            plugin.logger.error(error)
+            event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
+        }
+    },
     _sendMessage: async function(event, value) {
         let result = []
         let errors = []
@@ -562,6 +587,110 @@ var Listener = {
     },
     _privateMessage: async function(event, params, plugin) {
         let rawMessage = event.raw_message
+        let globalFriends = config.keywords['global-f']
+        for (let key in globalFriends) {
+            let value = globalFriends[key]
+            let extra = value.extra
+            extra = extra != undefined ? extra : {}
+            if (extra.fuzzy) { // 模糊匹配
+                if (rawMessage.includes(key)) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            } else {
+                if (rawMessage == key) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            }
+        }
+
+        delete globalFriends
+
+        let global = config.keywords.global
+        for (let key in global) {
+            let value = global[key]
+            let extra = value.extra
+            if (extra.fuzzy) { // 模糊匹配
+                if (rawMessage.includes(key)) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            } else {
+                if (rawMessage == key) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            }
+        }
+
+        delete global
+    },
+    _groupMessage: async function(event, params, plugin) {
+        let rawMessage = event.raw_message
+        let groupObject = config.keywords.groups[event.group_id]
+        if (groupObject != undefined) {
+            for (key in groupObject) {
+                let value = groupObject[key]
+                let extra = value.extra
+                extra = extra != undefined ? extra : {}
+                if (extra.fuzzy) { // 模糊匹配
+                    if (rawMessage.includes(key)) {
+                        Listener._sendMessageTry(event, value.value)
+                        return
+                    }
+                } else {
+                    if (rawMessage == key) {
+                        Listener._sendMessageTry(event, value.value)
+                        return
+                    }
+                }
+            }
+        }
+
+        delete groupObject
+
+        let globalGroups = config.keywords['global-g']
+        for (let key in globalGroups) {
+            let value = globalGroups[key]
+            let extra = value.extra
+            extra = extra != undefined ? extra : {}
+            if (extra.fuzzy) { // 模糊匹配
+                if (rawMessage.includes(key)) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            } else {
+                if (rawMessage == key) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            }
+        }
+
+        delete globalGroups
+
+        let global = config.keywords.global
+        for (let key in global) {
+            let value = global[key]
+            let extra = value.extra
+            if (extra.fuzzy) { // 模糊匹配
+                if (rawMessage.includes(key)) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            } else {
+                if (rawMessage == key) {
+                    Listener._sendMessageTry(event, value.value)
+                    return
+                }
+            }
+        }
+
+        delete global
+    },
+    _privateMessage_old: async function(event, params, plugin) {
+        let rawMessage = event.raw_message
         let globalFriendsValue = config.keywords['global-f'][rawMessage]
         if (globalFriendsValue != undefined) {
             try {
@@ -586,7 +715,7 @@ var Listener = {
             return
         }
     },
-    _groupMessage: async function(event, params, plugin) {
+    _groupMessage_old: async function(event, params, plugin) {
         let rawMessage = event.raw_message
         let groupObject = config.keywords.groups[event.group_id]
         if (groupObject != undefined) {

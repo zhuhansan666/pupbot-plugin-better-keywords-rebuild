@@ -1,6 +1,6 @@
 {
     "header": "〓 ${plugin.name} 〓",
-    "help": "帮助菜单\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(重启生效);][update or flash -> 更新语言列表;]\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <keyword> <permissonGroup> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)",
+    "help": "帮助菜单\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(重启生效);][update or flash -> 更新语言列表;]\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <keyword> <permissonGroup> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\t\ninfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
     "error": "运行发生错误: ${errorStr}",
     "warning": "警告: ${errorStr}",
     "noPermisson": "对于修改keywords, 您没有足够的权限",
