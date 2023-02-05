@@ -169,7 +169,7 @@ var TOOLS = {
         return true
     },
     escape: function(string) {
-        string = string.replace(/↵/g, '\n').replace(/\t/, '\t')
+        string = string.replace('\\n', '\n').replace('\\t', '\t')
 
         return string
     }
@@ -657,7 +657,8 @@ var Update = {
         }
 
         let msg = TOOLS.addHeader(
-                language.updater.try.replace('${vnow}', version).replace('${latest}', latestVersion), language)
+                language.updater.try.replace('${vnow}', version).replace('${latest}', latestVersion), language
+            )
             // plugin.logger.info(msg)
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
         plugin.logger.debug(`${msg}`)
