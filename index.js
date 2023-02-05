@@ -156,16 +156,12 @@ var TOOLS = {
         let _arr = latest.toString().split('.')
         let _this = thisVer.toString().split('.')
         for (let i = 0; i < _arr.length; i++) {
-            if (typeof _arr[i] == "number") {
-                try {
-                    if (_this[i] < _arr[i]) {
-                        return false
-                    }
-                } catch (error) {
-                    plugin.logger.warn(`Compare version warn: ${error.stack}`)
+            try {
+                if (_this[i] < _arr[i]) {
+                    return false
                 }
-            } else {
-                plugin.logger.warn(`Compare version warn: ${_arr[i]} is not a number`)
+            } catch (error) {
+                plugin.logger.warn(`Compare version warn: ${error.stack}`)
             }
         }
         return true

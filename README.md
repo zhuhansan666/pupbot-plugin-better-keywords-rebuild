@@ -57,3 +57,4 @@
 - [x] `TypeError: value.includes is not a function`
 - [x] `ReferenceError: globalFriendsValue is not defined` (Line603 Font52)
 - [x] \n 不会替换为 换行
+- [x] 版本比较问题
