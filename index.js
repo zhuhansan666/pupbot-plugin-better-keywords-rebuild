@@ -1,4 +1,5 @@
 const debug = false
+var oldVersion = false
 
 const fs = require('node:fs')
 const os = require('node:os')
@@ -769,6 +770,9 @@ var Listener = {
 
 var Update = {
     checker: async function() {
+        if (oldVersion) { //是老旧的版本退出
+            return
+        }
         plugin.logger.debug(`try to check version`)
         let latestVersion = "0.0.0"
         let { data } = await (axios.get(versionApi, headers = UAheaders))
@@ -801,6 +805,7 @@ var Update = {
             plugin.logger.warn(`reInstall(update) pkg warn: ${error.stack}`)
         }
 
+        oldVersion = true
     },
     reInstall: async function(pkg, reload = true) {
         let result = await install(pkg)
@@ -859,7 +864,7 @@ reloadConfig()
 reloadlanguage()
 
 plugin.onMounted(() => {
-    hooker(null, null, null, Update.checker) // check update when plugin start
+    // hooker(null, null, null, Update.checker) // check update when plugin start
     try {
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
         plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
