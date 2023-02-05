@@ -169,6 +169,11 @@ var TOOLS = {
             }
         }
         return true
+    },
+    escape: function(string) {
+        string = string.replace(/↵/g, '\n').replace(/\t/, '\t')
+
+        return string
     }
 }
 
@@ -540,7 +545,7 @@ var Listener = {
                         result.push(segment.sface(item.value))
                     }
                 } else if (item.type == 'text') {
-                    result.push(item.value)
+                    result.push(TOOLS.escape(item.value))
                 } else {
                     errors.push(`Unknown value type ${item.type}`)
                     plugin.logger.warn(`Unknown value type ${item.type}`)
