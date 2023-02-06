@@ -1,0 +1,25 @@
+{
+    "name": "kivibot-plugin-better-keywords-rebuild",
+    "version": "3.0.5",
+    "description": "更好的关键词回复重制版",
+    "main": "index.js",
+    "scripts": {
+        "test": "index.js"
+    },
+    "keywords": [
+        "keyword",
+        "keywords",
+        "better",
+        "rebuild",
+        "node.js",
+        "javascript",
+        "kivi",
+        "kivibot"
+    ],
+    "author": "爱喝牛奶の涛哥",
+    "license": "AGPL-3.0-or-later",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zhuhansan666/kivibot-plugin-better-keywords-rebuild.git"
+    }
+}
