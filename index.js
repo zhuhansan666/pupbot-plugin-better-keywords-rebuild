@@ -5,8 +5,14 @@ const fs = require('node:fs')
 const os = require('node:os')
 const path = require('path')
 const { segment } = require("oicq")
-const { disablePlugin, enablePlugin, install, NodeModulesDir, PupPlugin, PluginDataDir, PupConf, axios } = require('@pupbot/core')
 const { name, version } = require('./package.json')
+try {
+    var { disablePlugin, enablePlugin, install, NodeModulesDir, PupPlugin, PluginDataDir, PupConf, axios } = require('@pupbot/core')
+    var isKivibot = false
+} catch (error) {
+    var { disablePlugin, enablePlugin, install, NodeModulesDir, KiviPlugin, PluginDataDir, KiviConf, axios } = require('@kivibot/core')
+    var isKivibot = true
+}
 
 const versionApi = `https://registry.npmjs.org/${name}`
 const botRoot = path.join(PluginDataDir, "../../") // 机器人根目录
@@ -445,7 +451,7 @@ var Commands = {
         }
     },
     about: function(event, params, plugin) {
-        event.reply(TOOLS.addHeader(language.about.replace('${plugin.version}', plugin.version).replace('${plugin.name}', plugin.name), language))
+        event.reply(TOOLS.addHeader(language.about.replace('${plugin.version}', plugin.version).replace('${bn}', isKivibot ? "Kivibot" : "Pupbot"), language))
     },
     changeCmd: function(event, params, plugin) {
         if (TOOLS.isAdmin(event, true)) {
@@ -847,7 +853,12 @@ var Update = {
     }
 }
 
-const plugin = new PupPlugin(TOOLS.getPluginName(name), version)
+if (!isKivibot) {
+    var plugin = new PupPlugin(TOOLS.getPluginName(name), version)
+} else {
+    var plugin = new KiviPlugin(TOOLS.getPluginName(name), version)
+}
+
 var language = require(path.join(__dirname, `./languages/en-us.json`))
 
 function reloadConfig() {

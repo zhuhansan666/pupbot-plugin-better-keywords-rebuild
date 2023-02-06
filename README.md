@@ -1,4 +1,4 @@
-## 更好的关键词回复-重制版 | pupbot-plugin-better-keywords-rebuild
+## 更好的关键词回复-重制版 | pupbot-plugin-better-keywords-rebuild / kivibot-plugin-better-keywords-rebuild
 ## 用于自定义关键字并回复(有分群、私聊功能)
 
 ## 安装
@@ -68,3 +68,4 @@
 
 ## 大版本看点
 * V3.0.0 新增模糊匹配(详见`/bkw help`)
+* V3.0.2 新增对 `kivibot` 支持
