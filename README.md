@@ -12,6 +12,7 @@
 ```
 
 ## 兼容性提示
+> 现已支持 `kivibot` 和 `pupbot`, 但本插件仅在 `pupbot` 进行测试, 不保证完全兼容 `kivibot`!
 * 本插件与 better-keywords 不兼容
 * 本插件为 better-keywords 重制版, 功能几乎相同, 安装本插件前请卸载 better-keywords
 
@@ -38,14 +39,17 @@
 * 支持自定义提示文本(在插件安装目录`./language/<lang-code>.json`中)
 
 ## 配置文件详解
-
-```json
+```
 {
     "keywords": {  // 主键(root)
-        "groups": {},  // 当前群聊{ <gid(群号)>: { <key>: value: [{value: <value>, type: <type>}], extra: {}} } }
-        "global-g": {}, // 全局群聊{<key>: value: [{value: <value>, type: <type>}], extra: {}}
-        "global-f": {}, // 全局私聊{<key>: value: [{value: <value>, type: <type>}], extra: {}}
-        "global": {} // 全局群聊和私聊{<key>: value: [{value: <value>, type: <type>}], extra: {}}
+        // 当前群聊{ <gid(群号)>: { <key>: value: [{value: <value>, type: <type>}], extra: {}} } }
+        "groups": {},
+        // 全局群聊{<key>: value: [{value: <value>, type: <type>}], extra: {}}
+        "global-g": {},
+        // 全局私聊{<key>: value: [{value: <value>, type: <type>}], extra: {}}
+        "global-f": {},
+        // 全局群聊和私聊{<key>: value: [{value: <value>, type: <type>}], extra: {}}
+        "global": {}
     }
 }
 ```
@@ -69,3 +73,4 @@
 ## 大版本看点
 * V3.0.0 新增模糊匹配(详见`/bkw help`)
 * V3.0.4 新增对 `kivibot` 支持
+* V4.0.0 对语言文件进行重构, 现已完全支持多语言

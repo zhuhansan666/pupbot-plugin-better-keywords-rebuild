@@ -6,6 +6,7 @@ const os = require('node:os')
 const path = require('path')
 const { segment } = require("oicq")
 const { name, version } = require('./package.json')
+const { languages } = require('./languages')
 try {
     var { disablePlugin, enablePlugin, install, NodeModulesDir, PupPlugin, PluginDataDir, PupConf, axios } = require('@pupbot/core')
     var isKivibot = false
@@ -97,9 +98,6 @@ var TOOLS = {
             }
         }
     },
-    addHeader: function(string, language) {
-        return `${language.header.replace('${plugin.name}', plugin.name)}\n${string.replace('${plugin.name}', plugin.name)}`
-    },
     isAsyncFunc: function(func) {
         if (typeof func === "function") {
             try {
@@ -179,6 +177,23 @@ var TOOLS = {
         string = string.replace('\\n', '\n').replace('\\t', '\t')
 
         return string
+    },
+    formatLang(string, languageObj, arr) {
+        string = `${languageObj.header}\n${string}`
+        string = string.replace('{pn}', plugin.name).replace('{pv}', plugin.version)
+
+        if (arr == undefined) {
+            return string
+        }
+
+        if (typeof arr == "string") {
+            return string.replace('{0}', arr)
+        }
+
+        for (let i = 0; i < arr.length; i++) {
+            string = string.replace(`{${i}}`, arr[i])
+        }
+        return string
     }
 }
 
@@ -214,6 +229,29 @@ const permissonType = {
     'u': { code: 'global-g', msg: { 'zh-cn': '所有群聊', 'en-us': 'all groups' } },
     'f': { code: 'global-f', msg: { 'zh-cn': '所有私信', 'en-us': 'all friends' } },
     'g': { code: 'global', msg: { 'zh-cn': '所有群聊和私信', 'en-us': 'all groups and friends(global)' } },
+}
+
+var languageMgr = {
+    find: function(name, defualt = undefined) {
+        /**
+         * @param name 语言名称
+         * @returns 默认返回语言代号(如 zh-cn, en-us, ...), defualt不为undefined返回defualt内容
+         */
+        name = name.toLowerCase()
+        let lang = languages[name.replace('_', '-')]
+        if (lang) {
+            return name
+        }
+
+        for (let key in languages) {
+            let value = languages[key]
+            if (value["#name"] && value["#name"].includes(name)) {
+                return key
+            }
+        }
+
+        return defualt ? defualt : languages.defualt // 都找不到返回默认
+    }
 }
 
 var Manager = {
@@ -328,7 +366,7 @@ var Manager = {
                         let msg = keyname.msg[config.lang]
                         ptypesMsg.push(msg != undefined ? msg : keyname.msg[defaultConfig.lang])
                     } else {
-                        event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', '无法在私聊添加/修改当前群聊项'), language))
+                        event.reply(TOOLS.formatLang(language.warning, language, language.warnings.cantAddGoutG))
                     }
                 }
             } else {
@@ -336,7 +374,7 @@ var Manager = {
             }
         }
         if (unknownP.length > 0) {
-            event.reply(TOOLS.addHeader(language.warning.replace("${errorStr}", `未知权限组 ${unknownP.join(', ')}`), language))
+            event.reply(TOOLS.formatLang(language.warning, language, language.warnings.unkonwnPg.replace('{0}', unknownP.join(', '))))
         }
         return ptypesMsg.join(', ')
     },
@@ -360,7 +398,7 @@ var Manager = {
                             delete config.keywords[keyname.code][event.group_id]
                         }
                     } else {
-                        event.reply(TOOLS.addHeader(language.warning.replace("${errorStr}", '无法在私聊删除当前群聊项'), language))
+                        event.reply(TOOLS.formatLang(language.warning, language, ))
                     }
                 }
             } else {
@@ -368,7 +406,7 @@ var Manager = {
             }
         }
         if (unknownP.length > 0) {
-            event.reply(TOOLS.addHeader(language.warning.replace("${errorStr}", `未知权限组 ${unknownP.join(', ')}`), language))
+            event.reply(TOOLS.formatLang(language.warning, language, language.warnings.unkonwnPg.replace('{0}', unknownP.join(', '))))
         }
         return ptypesMsg.join(', ')
     }
@@ -376,133 +414,161 @@ var Manager = {
 
 var Commands = {
     bkw: function(event, params, plugin) {
-        if (TOOLS.isAdmin(event)) {
-            command = params[0]
-            if (command) {
-                command = command.toLowerCase()
-                if (command == 'add') {
-                    let [_, keyname, permisson] = params
-                    let info = (params.slice(3, params.length))
-                    if (keyname && permisson && info) {
-                        // plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
-                        reloadConfig()
-                        if (permisson == '*') {
-                            permisson = 'pufg'
-                        }
-                        let permissonGroups = Manager.add(keyname, info, permisson, event)
-                        plugin.saveConfig(config) // 保存配置文件
-                        event.reply(TOOLS.addHeader(language.addSuccess.replace('${keyname}', keyname).replace('${permissonGroup}', permissonGroups), language), true)
-                    } else {
-                        event.reply(TOOLS.addHeader(language.error.replace('${errSting}', '缺少参数'), language), true)
-                        event.reply(TOOLS.addHeader(language.help, language))
-                    }
-                } else if (command == 'rm') {
-                    let [_, keyname, permisson] = params
-                    if (keyname && permisson) {
-                        if (permisson == '*') {
-                            permisson = 'pufg'
-                        }
-                        // plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
-                        reloadConfig()
-                        let permissonGroups = Manager.remove(keyname, permisson, event)
-                        plugin.saveConfig(config) // 保存配置文件
-                        event.reply(TOOLS.addHeader(language.rmSuccess.replace('${keyname}', keyname).replace('${permissonGroup}', permissonGroups), language), true)
-                    } else {
-                        event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', '缺少参数'), language), true)
-                        event.reply(TOOLS.addHeader(language.help, language))
-                    }
-                } else if (command == 'about') {
-                    // this.about(event, params, plugin)
-                    Commands.about(event, params, plugin)
-                } else if (command == 'lang') {
-                    secCommand = params[1];
-                    if (secCommand) {
-                        secCommand = secCommand.toLowerCase()
-                        if (secCommand == 'list') { // 支持的语言
-                            event.reply(TOOLS.addHeader(supportLangeuages.join('\n'), language), true)
-                        } else if (secCommand == 'set') {
-                            let tartgetLang = params[2].toLowerCase().replace('_', '-') // 目标语言(不区分大小写和_-)
-                            if (tartgetLang && supportLangeuages.includes(tartgetLang)) {
-                                config.lang = tartgetLang
-                                plugin.saveConfig(config)
-                                reloadlanguage()
-                                event.reply(TOOLS.addHeader(`设置语言成功: ${tartgetLang}, 已立即生效\nSet language success: ${tartgetLang}, language took effect.`, language), true)
-                            } else {
-                                event.reply(TOOLS.addHeader(`未知的语言: ${tartgetLang}, 请检查输入是否正确\nUnknown language: ${tartgetLang}, place check the input!`, language), true)
-                            }
-                        } else if (secCommand == 'update' || secCommand == 'flash') {
-                            supportLangeuages = TOOLS.getSupportLanguages()
-                            event.reply(TOOLS.addHeader(`刷新语言成功:\nReflush languages success:\n${supportLangeuages}`, language), true)
-                        } else {
-                            event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', ` 未知的参数: ${secCommand}\nUnknown argv: ${secCommand}`), language), true)
-                        }
-                    } else {
-                        event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `secCommand 不能为空\nsecCommand could not be empty`), language), true)
-                    }
-                } else {
-                    event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `未知的参数: ${command}`), language), true)
-                    event.reply(TOOLS.addHeader(language.help, language))
-                }
-            } else {
-                event.reply(TOOLS.addHeader(language.help, language))
+        if (!TOOLS.isAdmin(event)) { // 不是管理员
+            return
+        }
+
+        command = params[0]
+        if (!command) {
+            event.reply(TOOLS.formatLang(language.help, language))
+            return
+        }
+
+        command = command.toLowerCase()
+        if (command == 'add') {
+            let [_, keyname, permisson] = params
+            let info = (params.slice(3, params.length))
+            if (!(keyname && permisson && info)) {
+                event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
+                event.reply(TOOLS.formatLang(language.help, language))
+                return
             }
-        } else {
-            event.reply(TOOLS.addHeader(language.noPermisson, language))
+
+            reloadConfig()
+            if (permisson == '*') {
+                permisson = 'pufg'
+            }
+            let permissonGroups = Manager.add(keyname, info, permisson, event)
+            plugin.saveConfig(config) // 保存配置文件
+            event.reply(TOOLS.formatLang(language.addSuccess, language, [keyname, permissonGroups]), true)
+
+        } else if (command == 'rm') {
+            let [_, keyname, permisson] = params
+            if (!(keyname && permisson)) {
+                event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
+                event.reply(TOOLS.formatLang(language.help, language))
+                return
+            }
+
+            reloadConfig()
+            if (permisson == '*') {
+                permisson = 'pufg'
+            }
+            let permissonGroups = Manager.remove(keyname, permisson, event)
+            plugin.saveConfig(config) // 保存配置文件
+            event.reply(TOOLS.formatLang(language.rmSuccess, language, [keyname, permissonGroups]), true)
+
+        } else if (command == 'about') {
+            Commands.about(event, params, plugin)
+
+        } else if (command == 'lang') {
+            secCommand = params[1];
+            if (!secCommand) {
+                event.reply(TOOLS.formatLang(language.error, language, language.errors.cantEmpty.replace('{0}', 'secCommand')), true)
+                event.reply(TOOLS.formatLang(language.help, language))
+                return
+            }
+
+            secCommand = secCommand.toLowerCase()
+            if (secCommand == 'list') { // 支持的语言
+                let string = ""
+                for (let key in languages) {
+                    let names = languages[key]['#name']
+                    if (names != undefined) {
+                        string = `${string}${key}: ${names[0]}\n`
+                    }
+                }
+                event.reply(TOOLS.formatLang(string, language), true)
+            } else if (secCommand == 'set') {
+                let tartgetLang = params[2]
+                if (!tartgetLang) {
+                    event.reply(TOOLS.formatLang(language.languages.unknownLang, language, 'undefined'), true)
+                    return
+                }
+                tartgetLang = tartgetLang.toLowerCase().replace('_', '-') // 目标语言(不区分大小写和_-)
+                tartgetLang = languageMgr.find(tartgetLang, false)
+
+                if (!tartgetLang) {
+                    event.reply(TOOLS.formatLang(language.languages.unknownLang, language, [tartgetLang]), true)
+                    return
+                }
+
+                config.lang = tartgetLang
+                plugin.saveConfig(config)
+                reloadlanguage()
+
+                let tartgetLangString = ""
+                try {
+                    tartgetLangString = languages[tartgetLang]['#name'][0]
+                } catch (error) {
+                    tartgetLangString = tartgetLang
+                }
+                event.reply(TOOLS.formatLang(language.languages.setSuccess, language, [tartgetLangString]), true)
+            } else {
+                event.reply(TOOLS.formatLang(language.error, language, language.errors.unknownCmd.replace('{0}', secCommand), true))
+            }
         }
     },
     about: function(event, params, plugin) {
-        event.reply(TOOLS.addHeader(language.about.replace('${plugin.version}', plugin.version).replace('${bn}', isKivibot ? "Kivibot" : "Pupbot"), language))
+        event.reply(TOOLS.formatLang(language.about, language, [isKivibot ? "Kivibot" : "Pupbot"]))
     },
     changeCmd: function(event, params, plugin) {
-        if (TOOLS.isAdmin(event, true)) {
-            command = params[0]
-            if (command) {
-                command = command.toLowerCase()
-                if (command == 'add' || command == 'a') {
-                    oldCmd = params[1]
-                    target = params[2]
-                    if (oldCmd && target) {
-                        if (config.commands[oldCmd] != undefined) {
-                            if (!config.commands[oldCmd].includes(target)) {
-                                config.commands[oldCmd].push(target)
-                                plugin.saveConfig(config)
-                                event.reply(TOOLS.addHeader(language.success.replace('${0}', `添加命令别名成功 (${oldCmd} +=> ${target})`), language))
-                            } else {
-                                event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `${target} 已在 ${oldCmd} 别名中存在`), language))
-                            }
-                        } else {
-                            event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `原命令 ${oldCmd} 不存在`), language))
-                        }
-                    } else {
-                        event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `oldCmd targer均不能为空`), language))
-                    }
-                } else if (command == 'remove' || command == 'rm') {
-                    oldCmd = params[1]
-                    target = params[2]
-                    if (oldCmd && target) {
-                        if (config.commands[oldCmd] != undefined) {
-                            if (config.commands[oldCmd].includes(target)) {
-                                TOOLS.removeInArray(config.commands[oldCmd], target)
-                                plugin.saveConfig(config)
-                                event.reply(TOOLS.addHeader(language.success.replace('${0}', `删除命令别名成功 (${oldCmd} -=> ${target})`), language))
-                            } else {
-                                event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `${target} 不在 ${oldCmd} 别名中`), language))
-                            }
-                        } else {
-                            event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `原命令 ${oldCmd} 不存在`, language)))
-                        }
-                    } else {
-                        event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `oldCmd targer均不能为空`, language)))
-                    }
-                } else {
-                    event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `未知的命令: ${command}`, language)))
-                }
-            } else {
-                event.reply(TOOLS.addHeader(language.chmHelp, language))
-                    // event.reply(TOOLS.addHeader(language.error.replace('${errorStr}', `command 不能为空`)))
+        if (!TOOLS.isAdmin(event, true)) {
+            return
+        }
+
+        command = params[0]
+        if (!command) {
+            event.reply(TOOLS.formatLang(language.error, language, [language.errors.cantEmpty.replace('{0}', 'command')]), true)
+            event.reply(TOOLS.formatLang(language.chmHelp, language))
+        }
+
+        command = command.toLowerCase()
+        if (command == 'add' || command == 'a') {
+            oldCmd = params[1]
+            target = params[2]
+            if (!(oldCmd && target)) {
+                event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
+                return
             }
+
+            if (config.commands[oldCmd] == undefined) {
+                event.reply(TOOLS.formatLang(language.error, language, [language.chm.oldCmdUndefined.replace('{0}', oldCmd)]), true)
+                return
+            }
+
+            if (config.commands[oldCmd].includes(target)) {
+                event.reply(TOOLS.formatLang(language.warning, language, language.chm.targetExist.replace('{0}', target).replace('{1}', oldCmd)), true)
+                return
+            }
+
+            config.commands[oldCmd].push(target)
+            plugin.saveConfig(config)
+            event.reply(TOOLS.formatLang(language.chm.addSuccess, language, [target, oldCmd]), true)
+
+        } else if (command == 'remove' || command == 'rm') {
+            oldCmd = params[1]
+            target = params[2]
+            if (!(oldCmd && target)) {
+                event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
+                return
+            }
+            if (config.commands[oldCmd] == undefined) {
+                event.reply(TOOLS.formatLang(language.error, language, [language.chm.oldCmdUndefined.replace('{0}', oldCmd)]), true)
+                return
+            }
+
+            if (!(config.commands[oldCmd].includes(target))) {
+                event.reply(TOOLS.formatLang(language.warning, language, language.chm.targetUnexist.replace('{0}', target).replace('{1}', oldCmd)), true)
+                return
+            }
+
+            TOOLS.removeInArray(config.commands[oldCmd], target)
+            plugin.saveConfig(config)
+            event.reply(TOOLS.formatLang(language.chm.rmSuccess, language, [target, oldCmd]), true)
         } else {
-            event.reply(TOOLS.addHeader(language.noPermisson, language))
+            event.reply(TOOLS.formatLang(language.error, language, language.errors.unknownCmd.replace('{0}', command)), true)
+            return
         }
     }
 }
@@ -513,7 +579,7 @@ var Listener = {
             await Listener._sendMessage(event, value)
         } catch (error) {
             plugin.logger.error(error)
-            event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
+            event.reply(TOOLS.formatLang(language.warning, language, language.warnings.sendMessage.replace('{0}', `${error.stack}\n`)))
         }
     },
     _sendMessage: async function(event, value) {
@@ -589,7 +655,7 @@ var Listener = {
             event.reply(result)
         } else {
             plugin.logger.warn(`Something cause result array empty, message can't send [info ↑]`)
-            event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `[↓]一些事情导致消息发送失败[↓]\n${errors.join('\n')}`), language))
+            event.reply(TOOLS.formatLang(language.warning, language, [language.warnings.somethingWrong.replace('{0}', errors.join('\n'))]))
         }
     },
     _privateMessage: async function(event, params, plugin) {
@@ -704,7 +770,6 @@ var Listener = {
                 await Listener._sendMessage(event, globalFriendsValue.value)
             } catch (error) {
                 plugin.logger.error(error)
-                event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
             }
             return
         }
@@ -717,7 +782,6 @@ var Listener = {
                 await Listener._sendMessage(event, globalValue.value)
             } catch (error) {
                 plugin.logger.error(error)
-                event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
             }
             return
         }
@@ -732,7 +796,6 @@ var Listener = {
                     await Listener._sendMessage(event, groupValue.value)
                 } catch (error) {
                     plugin.logger.error(error)
-                    event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
                 }
                 return
             }
@@ -747,7 +810,6 @@ var Listener = {
                 await Listener._sendMessage(event, globalGroupsValue.value)
             } catch (error) {
                 plugin.logger.error(error)
-                event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
             }
             return
         }
@@ -760,7 +822,6 @@ var Listener = {
                 await Listener._sendMessage(event, globalValue.value)
             } catch (error) {
                 plugin.logger.error(error)
-                event.reply(TOOLS.addHeader(language.warning.replace('${errorStr}', `发送消息错误:\n${error.stack}`), language))
             }
             return
         }
@@ -795,10 +856,9 @@ var Update = {
             return
         }
 
-        let msg = TOOLS.addHeader(
-                language.updater.try.replace('${vnow}', version).replace('${latest}', latestVersion), language
-            )
-            // plugin.logger.info(msg)
+        let msg = TOOLS.formatLang(
+            language.updater.try, language, latestVersion
+        )
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
         plugin.logger.debug(`${msg}`)
 
@@ -818,7 +878,7 @@ var Update = {
 
         if (!result) {
             plugin.logger.warn(language.updater.updateFailed)
-            plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader(language.updater.updateFailed, language))
+            plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.updater.updateFailed, language))
             return false
         }
 
@@ -838,18 +898,18 @@ var Update = {
         let mainAdmin = plugin.mainAdmin
         let disableResult = await disablePlugin(_bot, PupConf, pname, ppath)
         if (!(disableResult === true)) {
-            let = TOOLS.addHeader(language.updater.disableFailed.replace('${e}', disableResult), language)
+            let = TOOLS.formatLang(language.updater.disableFailed, language, [disableResult])
             _bot.sendPrivateMsg(mainAdmin, msg)
             return false
         }
         let enableResult = await enablePlugin(_bot, PupConf, ppath)
         if (!(enableResult === true)) {
-            let msg = TOOLS.addHeader(language.updater.enableFailed.replace('${e}', enableResult), language)
+            let msg = TOOLS.formatLang(language.updater.enableFailed, language, [enableResult])
             plugin.logger.error(msg)
             _bot.sendPrivateMsg(mainAdmin, msg)
             return false
         }
-        _bot.sendPrivateMsg(mainAdmin, TOOLS.addHeader(language.updater.updateSuccess, language))
+        _bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language))
     }
 }
 
@@ -859,7 +919,7 @@ if (!isKivibot) {
     var plugin = new KiviPlugin(TOOLS.getPluginName(name), version)
 }
 
-var language = require(path.join(__dirname, `./languages/en-us.json`))
+var language = languages[languages.defualt]
 
 function reloadConfig() {
     plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件
@@ -867,9 +927,7 @@ function reloadConfig() {
 }
 
 function reloadlanguage() {
-    let filename = path.join(__dirname, `./languages/${config.lang}.json`)
-    filename = fs.existsSync(filename) && fs.lstatSync(filename).isFile() ? filename : path.join(__dirname, `./languages/${config.lang}.json`)
-    language = require(filename)
+    language = languages[languageMgr.find(config.lang)]
 }
 reloadConfig()
 reloadlanguage()
@@ -877,7 +935,7 @@ reloadlanguage()
 plugin.onMounted(() => {
     // hooker(null, null, null, Update.checker) // check update when plugin start
     try {
-        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.addHeader('使用 /bkw lang set <语言代号> 设置语言\nUse /bkw lang set <language-code> to set language.', language))
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.tips.chlang, language))
         plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
         plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
         plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
