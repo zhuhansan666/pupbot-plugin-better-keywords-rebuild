@@ -1,5 +1,5 @@
 {
-    "name": "kivibot-plugin-better-keywords-rebuild",
+    "name": "pupbot-plugin-better-keywords-rebuild",
     "version": "3.0.3",
     "description": "更好的关键词回复重制版",
     "main": "index.js",
@@ -13,8 +13,8 @@
         "rebuild",
         "node.js",
         "javascript",
-        "kivi",
-        "kivibot"
+        "pup",
+        "pupbot"
     ],
     "author": "爱喝牛奶の涛哥",
     "license": "AGPL-3.0-or-later",
