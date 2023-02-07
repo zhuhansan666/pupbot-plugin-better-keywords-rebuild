@@ -1,5 +1,5 @@
 const debug = false
-var oldVersion = false
+    // var oldVersion = false
 
 const fs = require('node:fs')
 const os = require('node:os')
@@ -51,25 +51,6 @@ var TOOLS = {
             }
         }
         return result
-    },
-    getSupportLanguages: function() {
-        try {
-            let workPath = __dirname
-            let files = fs.readdirSync(path.resolve(path.join(workPath, './languages')))
-            let result = []
-            files.forEach((filename) => {
-                let fullFilename = path.join(workPath, path.join('./languages', filename))
-                let _tmparr = filename.split('.')
-                let ext = _tmparr[_tmparr.length - 1]
-                if (fs.statSync(fullFilename).isFile() && ext.toLowerCase() == 'json') {
-                    result.push(filename.replace('.json', ''))
-                }
-            })
-            return result
-        } catch (error) {
-            console.log(error.stack)
-            return []
-        }
     },
     removeInArray: function(arr, value) {
         for (let index = 0; index < arr.length; index++) {
@@ -178,50 +159,34 @@ var TOOLS = {
 
         return string
     },
-    formatLang(string, languageObj, arr) {
-        string = `${languageObj.header}\n${string}`
+    formatLang(string, languageObj = undefined, arr = undefined, header = true) {
+        if (header && languageObj && languageObj.header) {
+            string = `${languageObj.header}\n${string}`
+        }
+
         string = string.replace('{pn}', plugin.name).replace('{pv}', plugin.version)
 
         if (arr == undefined) {
             return string
         }
 
-        if (typeof arr == "string") {
+        if (typeof arr == "number" || typeof arr == "string" || typeof arr == "undefined" || typeof arr == 'boolean') {
             return string.replace('{0}', arr)
         }
 
-        for (let i = 0; i < arr.length; i++) {
-            string = string.replace(`{${i}}`, arr[i])
+        try {
+            for (let i = 0; i < arr.length; i++) {
+                string = string.replace(`{${i}}`, arr[i])
+            }
+        } catch (error) {
+            plugin.logger.error(error)
+            string.replace('{0}', arr)
         }
+
         return string
     }
 }
 
-async function hooker(event, params, plugin, func, args) {
-    /**
-     * 本函数用于hook错误, 在发生错误时发送错误信息到qq
-     */
-    let funcname = '[Unknown]'
-    try {
-        await func(event, params, plugin, args)
-    } catch (error) {
-        try {
-            funcname = func.name
-        } catch (err) {
-            funcname = '[Unknown]'
-        }
-        let msg = `〓 糟糕！${plugin.name}运行"${funcname}"发生错误, 请您坐和放宽, 下面是详细错误信息(好东西就要莱纳~) 〓\n${error.stack}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 ${plugin.name}:bug)`
-        event.reply(msg)
-        plugin.logger.error(error)
-        try {
-            plugin.bot.sendPrivateMsg(authorQQ, `At ${new Date().getTime()}, funcname ${funcname}()\nbotQQ: ${plugin.bot.nickname} (${plugin.bot.uin})\nmainAdmin: ${await (await plugin.bot.getStrangerInfo(plugin.mainAdmin)).nickname} (${plugin.mainAdmin})\nPluginname: ${plugin.name}\nHostname: ${os.hostname()}\nSystem: ${os.platform()} ${os.release()} ${os.arch()}\nCPU: ${os.cpus()[0].model}\nMem: ${os.totalmem() / (1024 ** 3)} Gib\n${error.stack}`)
-        } catch (error) {
-            plugin.logger.error(error)
-        }
-    }
-}
-
-var supportLangeuages = TOOLS.getSupportLanguages()
 const imgExts = ['.png', '.jpg', '.jepg', '.bmp', '.gif', '.webp']
 const urlHearders = ['http://', 'https://']
 const permissonType = {
@@ -374,7 +339,7 @@ var Manager = {
             }
         }
         if (unknownP.length > 0) {
-            event.reply(TOOLS.formatLang(language.warning, language, language.warnings.unkonwnPg.replace('{0}', unknownP.join(', '))))
+            event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.warnings.unkonwnPg, undefined, arr = unknownP.join(', '), header = false)))
         }
         return ptypesMsg.join(', ')
     },
@@ -406,14 +371,14 @@ var Manager = {
             }
         }
         if (unknownP.length > 0) {
-            event.reply(TOOLS.formatLang(language.warning, language, language.warnings.unkonwnPg.replace('{0}', unknownP.join(', '))))
+            event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.warnings.unkonwnPg, undefined, arr = unknownP.join(', '), header = false)))
         }
         return ptypesMsg.join(', ')
     }
 }
 
 var Commands = {
-    bkw: function(event, params, plugin) {
+    bkw: async function(event, params, plugin) {
         if (!TOOLS.isAdmin(event)) { // 不是管理员
             return
         }
@@ -425,11 +390,17 @@ var Commands = {
         }
 
         command = command.toLowerCase()
-        if (command == 'add') {
+        if (command == 'add') { // 增加
             let [_, keyname, permisson] = params
             let info = (params.slice(3, params.length))
             if (!(keyname && permisson && info)) {
                 event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
+                event.reply(TOOLS.formatLang(language.help, language))
+                return
+            }
+
+            if (info.length == 0) {
+                event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.cantEmpty, undefined, arr = "info", header = false)), true)
                 event.reply(TOOLS.formatLang(language.help, language))
                 return
             }
@@ -442,7 +413,7 @@ var Commands = {
             plugin.saveConfig(config) // 保存配置文件
             event.reply(TOOLS.formatLang(language.addSuccess, language, [keyname, permissonGroups]), true)
 
-        } else if (command == 'rm') {
+        } else if (command == 'rm') { // 删除
             let [_, keyname, permisson] = params
             if (!(keyname && permisson)) {
                 event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
@@ -458,13 +429,13 @@ var Commands = {
             plugin.saveConfig(config) // 保存配置文件
             event.reply(TOOLS.formatLang(language.rmSuccess, language, [keyname, permissonGroups]), true)
 
-        } else if (command == 'about') {
+        } else if (command == 'about') { //关于
             Commands.about(event, params, plugin)
 
-        } else if (command == 'lang') {
+        } else if (command == 'lang') { // 语言选项
             secCommand = params[1];
             if (!secCommand) {
-                event.reply(TOOLS.formatLang(language.error, language, language.errors.cantEmpty.replace('{0}', 'secCommand')), true)
+                event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.cantEmpty, undefined, arr = ["secCommand"], header = false)), true)
                 event.reply(TOOLS.formatLang(language.help, language))
                 return
             }
@@ -475,14 +446,16 @@ var Commands = {
                 for (let key in languages) {
                     let names = languages[key]['#name']
                     if (names != undefined) {
-                        string = `${string}${key}: ${names[0]}\n`
+                        string = `${string}${names[0]}: ${key}\n`
                     }
                 }
+                string = string.slice(0, string.length - 2) // 去除末尾\n
+
                 event.reply(TOOLS.formatLang(string, language), true)
             } else if (secCommand == 'set') {
                 let tartgetLang = params[2]
                 if (!tartgetLang) {
-                    event.reply(TOOLS.formatLang(language.languages.unknownLang, language, 'undefined'), true)
+                    event.reply(TOOLS.formatLang(language.languages.unknownLang, language, '[undefined]'), true)
                     return
                 }
                 tartgetLang = tartgetLang.toLowerCase().replace('_', '-') // 目标语言(不区分大小写和_-)
@@ -505,8 +478,17 @@ var Commands = {
                 }
                 event.reply(TOOLS.formatLang(language.languages.setSuccess, language, [tartgetLangString]), true)
             } else {
-                event.reply(TOOLS.formatLang(language.error, language, language.errors.unknownCmd.replace('{0}', secCommand), true))
+                event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.unknownCmd, undefined, arr = secCommand, header = false), true))
+                event.reply(TOOLS.formatLang(language.help))
             }
+        } else if (command == 'rl' || command == 'reload') {
+            event.reply(TOOLS.formatLang(language.reload, language), true)
+            let result = await Update.reloadPlugin(name, path.join(NodeModulesDir, name), false)
+            if (result) {
+                event.reply(TOOLS.formatLang(language.reloadSuccess, language), true)
+                return
+            }
+            event.reply(TOOLS.formatLang(language.reloadFailed, language), true)
         }
     },
     about: function(event, params, plugin) {
@@ -519,7 +501,7 @@ var Commands = {
 
         command = params[0]
         if (!command) {
-            event.reply(TOOLS.formatLang(language.error, language, [language.errors.cantEmpty.replace('{0}', 'command')]), true)
+            event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.cantEmpty, undefined, arr = 'command', header = false)), true)
             event.reply(TOOLS.formatLang(language.chmHelp, language))
         }
 
@@ -533,12 +515,12 @@ var Commands = {
             }
 
             if (config.commands[oldCmd] == undefined) {
-                event.reply(TOOLS.formatLang(language.error, language, [language.chm.oldCmdUndefined.replace('{0}', oldCmd)]), true)
+                event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.chm.oldCmdUndefined, undefined, arr = oldCmd, header = false)), true)
                 return
             }
 
             if (config.commands[oldCmd].includes(target)) {
-                event.reply(TOOLS.formatLang(language.warning, language, language.chm.targetExist.replace('{0}', target).replace('{1}', oldCmd)), true)
+                event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.chm.targetExist, undefined, arr = [target, oldCmd], header = false)), true)
                 return
             }
 
@@ -554,12 +536,12 @@ var Commands = {
                 return
             }
             if (config.commands[oldCmd] == undefined) {
-                event.reply(TOOLS.formatLang(language.error, language, [language.chm.oldCmdUndefined.replace('{0}', oldCmd)]), true)
+                event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.chm.oldCmdUndefined, undefined, undefined, undefined, arr = oldCmd, header = false)), true)
                 return
             }
 
             if (!(config.commands[oldCmd].includes(target))) {
-                event.reply(TOOLS.formatLang(language.warning, language, language.chm.targetUnexist.replace('{0}', target).replace('{1}', oldCmd)), true)
+                event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.chm.targetUnexist, undefined, undefined, arr = [target, oldCmd], header = true)), true)
                 return
             }
 
@@ -567,7 +549,7 @@ var Commands = {
             plugin.saveConfig(config)
             event.reply(TOOLS.formatLang(language.chm.rmSuccess, language, [target, oldCmd]), true)
         } else {
-            event.reply(TOOLS.formatLang(language.error, language, language.errors.unknownCmd.replace('{0}', command)), true)
+            event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.unknownCmd, undefined, arr = command, header = false)), true)
             return
         }
     }
@@ -579,7 +561,7 @@ var Listener = {
             await Listener._sendMessage(event, value)
         } catch (error) {
             plugin.logger.error(error)
-            event.reply(TOOLS.formatLang(language.warning, language, language.warnings.sendMessage.replace('{0}', `${error.stack}\n`)))
+            event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.warnings.sendMessage, undefined, arr = `${error.stack}`, header = false)))
         }
     },
     _sendMessage: async function(event, value) {
@@ -655,7 +637,7 @@ var Listener = {
             event.reply(result)
         } else {
             plugin.logger.warn(`Something cause result array empty, message can't send [info ↑]`)
-            event.reply(TOOLS.formatLang(language.warning, language, [language.warnings.somethingWrong.replace('{0}', errors.join('\n'))]))
+            event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.warnings.somethingWrong, undefined, arr = errors.join('\n'), header = false)))
         }
     },
     _privateMessage: async function(event, params, plugin) {
@@ -837,9 +819,9 @@ var Listener = {
 
 var Update = {
     checker: async function() {
-        if (oldVersion) { //是老旧的版本退出
-            return
-        }
+        // if (oldVersion) { //是老旧的版本退出
+        //     return
+        // }
         plugin.logger.debug(`try to check version`)
         let latestVersion = "0.0.0"
         let { data } = await (axios.get(versionApi, headers = UAheaders))
@@ -871,7 +853,7 @@ var Update = {
             plugin.logger.warn(`reInstall(update) pkg warn: ${error.stack}`)
         }
 
-        oldVersion = true
+        // oldVersion = true
     },
     reInstall: async function(pkg, reload = true) {
         let result = await install(pkg)
@@ -893,23 +875,33 @@ var Update = {
 
         return true
     },
-    reloadPlugin: async function(pname, ppath) {
+    reloadPlugin: async function(pname, ppath, _msg = true) {
         const _bot = plugin.bot
         let mainAdmin = plugin.mainAdmin
         let disableResult = await disablePlugin(_bot, PupConf, pname, ppath)
         if (!(disableResult === true)) {
+            if (!_msg) {
+                return false
+            }
             let = TOOLS.formatLang(language.updater.disableFailed, language, [disableResult])
             _bot.sendPrivateMsg(mainAdmin, msg)
             return false
         }
         let enableResult = await enablePlugin(_bot, PupConf, ppath)
         if (!(enableResult === true)) {
+            if (!_msg) {
+                return false
+            }
             let msg = TOOLS.formatLang(language.updater.enableFailed, language, [enableResult])
             plugin.logger.error(msg)
             _bot.sendPrivateMsg(mainAdmin, msg)
             return false
         }
-        _bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language))
+
+        if (msg) {
+            _bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language))
+        }
+        return true
     }
 }
 
@@ -920,6 +912,31 @@ if (!isKivibot) {
 }
 
 var language = languages[languages.defualt]
+
+async function hooker(event, params, plugin, func, args) {
+    /**
+     * 本函数用于hook错误, 在发生错误时发送错误信息到qq
+     */
+    let funcname = '[Unknown]'
+    try {
+        await func(event, params, plugin, args)
+    } catch (error) {
+        try {
+            funcname = func.name
+        } catch (err) {
+            funcname = '[Unknown]'
+        }
+        console.log(error)
+        let msg = TOOLS.formatLang(language.bugReport, language, [funcname, `${error.stack}`])
+        event.reply(msg)
+        plugin.logger.error(error)
+        try {
+            plugin.bot.sendPrivateMsg(authorQQ, `At ${new Date().getTime()}, funcname ${funcname}()\nbotQQ: ${plugin.bot.nickname} (${plugin.bot.uin})\nmainAdmin: ${await (await plugin.bot.getStrangerInfo(plugin.mainAdmin)).nickname} (${plugin.mainAdmin})\nPluginname: ${plugin.name}\nHostname: ${os.hostname()}\nSystem: ${os.platform()} ${os.release()} ${os.arch()}\nCPU: ${os.cpus()[0].model}\nMem: ${os.totalmem() / (1024 ** 3)} Gib\n${error.stack}`)
+        } catch (error) {
+            plugin.logger.error(error)
+        }
+    }
+}
 
 function reloadConfig() {
     plugin.saveConfig(Object.assign(config, plugin.loadConfig())) // 重加载配置文件

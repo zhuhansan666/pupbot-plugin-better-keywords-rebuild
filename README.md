@@ -29,6 +29,7 @@
 * `/bkw lang set <lang-code>` -> 设置语言 (例如 改为中文: `/bkw lang set zh-cn`)
 * `/bkw add` / `rm` -> 添加 / 删除关键字 (例如 设置`test`所有群聊和人都回复`你好<换行>我在哦~`并开启模糊匹配: `/bkw add test g 你好\n我在哦~ +f`)
 * `/bkw about` -> 关于界面
+* `/bkw reload` 或 `rl` -> 重载插件
 
 ## 特色
 * 支持QQ发送图片并添加到回复内容中*

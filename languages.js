@@ -3,6 +3,7 @@ const languages = {
     "zh-cn": {
         "#name": ["简中", "中文简体", "chinese", "chinese (Chinese mainland)"],
         header: '〓 {pn} 〓',
+        bugReport: "是谁都可能会遇到困难的...\n尝试运行函数 {0} 发生了没有预料的错误:\n{1}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 {pn}:bug)",
         tips: {
             chlang: "使用 /bkw lang set <语言代号> 设置语言"
         },
@@ -24,7 +25,10 @@ const languages = {
         addSuccess: "关键词 {0} (权限组: {1})添加成功",
         rmSuccess: "关键词 {0} (权限组: {1})移除成功",
         about: "感谢您使用{pn} for {0}, 本插件用于提升 keywords 功能\n作者: 爱喝牛奶の涛哥, 当前版本: {pv}\n开源地址: \n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild",
-        succes: "{0} 成功",
+        success: "{0} 成功",
+        reload: "尝试重加载插件",
+        reloadSuccess: "重载成功",
+        reloadFailed: "重载失败, 错误见日志",
         chmHelp: "/alias add <原命令> <命令别名> => 新增命令别名\n/alias rm <原命令> <命令别名> => 删除命令别名",
         chm: {
             addSuccess: "添加命令别名成功 ({0} +=> {1})",
@@ -38,7 +42,7 @@ const languages = {
             updateFailed: "更新插件时出错, 详情见错误日志",
             disableFailed: "重载插件禁用时出错: {0}",
             enableFailed: "重载插件启用时出错: {0}",
-            updateSuccess: "插件更新成功"
+            updateSuccess: "插件更新成功, 当前版本: {pv}"
         },
         languages: {
             unknownLang: "未知的语言: {0}, 请检查输入是否正确",
@@ -48,6 +52,7 @@ const languages = {
     "en-us": {
         "#name": ["English", "English (United States)", "english"],
         header: "〓 {pn} 〓",
+        bugReport: "Anyone may encounter difficulties...\nWhen try to run function {0}, an unexpected mistake has occurred:\n{1}\n(if necessary, please send email to developer public.zhuhansan666@outlook.com remarks {pn}: bug)",
         tips: {
             chlang: "Use /bkw lang set <language-code> to set language."
         },
@@ -64,12 +69,15 @@ const languages = {
             somethingWrong: "[↓]Something caused the message to fail[↓]\n{0}",
             cantAddGoutG: "Cannot add / modify current group chat items in private chat",
             cantRmGoutG: "Unable to delete the current group chat item in private chat",
-            unkonwnPg: ""
+            unkonwnPg: "Unknown (multiple) permission groups: {0}"
         },
         addSuccess: "Add keyword {0} (permisson group: {1}) success",
         rmSuccess: "Remove keyword {0} (permisson group: {1}) success",
         about: "Thanks for your using plugin {pn} for {0}, this plugin will be keywords better than better!\nAuthor: 爱喝牛奶の涛哥 / LoveMilk · BrotherTao, version: {pv}\nOpen source: \n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild",
-        succes: "{0} succeed",
+        success: "{0} successd",
+        reload: "Try to reload plugin.",
+        reloadSuccess: "Reload successful.",
+        reloadFailed: "Reload failed: see the log to get errors.",
         chmHelp: "/alias add <old command> <command alias> => add command alias for old command\n/alias rm <old command> <command alias> => remove command alias for old command",
         chm: {
             addSuccess: "Command alias added successfully ({0} +=> {1})",
@@ -83,7 +91,7 @@ const languages = {
             updateFailed: "Try to update plugin error, see the error log for details",
             disableFailed: "Reload plugin disable it error: {0}",
             enableFailed: "Reload plugin enable it error: {0}",
-            updateSuccess: "Plugin update success"
+            updateSuccess: "Plugin update success, now version: {pv}"
         },
         languages: {
             unknownLang: "Unknown language: {0}, place check the input!",
