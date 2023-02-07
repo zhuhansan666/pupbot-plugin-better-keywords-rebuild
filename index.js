@@ -190,10 +190,10 @@ var TOOLS = {
 const imgExts = ['.png', '.jpg', '.jepg', '.bmp', '.gif', '.webp']
 const urlHearders = ['http://', 'https://']
 const permissonType = {
-    'p': { code: 'groups', msg: { 'zh-cn': '当前群聊', 'en-us': 'this group' } },
-    'u': { code: 'global-g', msg: { 'zh-cn': '所有群聊', 'en-us': 'all groups' } },
-    'f': { code: 'global-f', msg: { 'zh-cn': '所有私信', 'en-us': 'all friends' } },
-    'g': { code: 'global', msg: { 'zh-cn': '所有群聊和私信', 'en-us': 'all groups and friends(global)' } },
+    'p': { code: 'groups', msg: { 'zh-cn': '当前群聊', 'en-us': 'this group', 'zh-tw': '當前群聊' } },
+    'u': { code: 'global-g', msg: { 'zh-cn': '所有群聊', 'en-us': 'all groups', 'zh-tw': '所有群聊' } },
+    'f': { code: 'global-f', msg: { 'zh-cn': '所有私信', 'en-us': 'all friends', 'zh-tw': '所有私信' } },
+    'g': { code: 'global', msg: { 'zh-cn': '所有群聊和私信', 'en-us': 'all groups and friends(global)', 'zh-tw': '所有群聊和私信(全域)' } },
 }
 
 var languageMgr = {

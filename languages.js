@@ -49,6 +49,55 @@ const languages = {
             setSuccess: "设置语言成功: {0}, 已立即生效"
         }
     },
+    "zh-tw": {
+        "#name": ["繁中", "中文繁体", "chinese (traditional)", "chinese (Taiwan of China)", "traditional"],
+        header: '〓 {pn} 〓',
+        bugReport: "是誰都可能會遇到困難的...\n嘗試運行函數 {0} 發生了沒有預料的錯誤:\n{1}\n(如有需要請發送郵件至開發者 public.zhuhansan666@outlook.com 備註 {pn}:bug)",
+        tips: {
+            chlang: "使用 /bkw lang set <语言代号> 設置語言"
+        },
+        help: "幫助功能表\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <keyword> <permissonGroup> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
+        error: "執行發生錯誤: {0}",
+        errors: {
+            missArgv: "缺少參數",
+            unknownCmd: "未知的參數: {0}",
+            cantEmpty: "{0} 不能為空"
+        },
+        warning: "警告: {0}",
+        warnings: {
+            sendMessage: "發送消息錯誤: {0}",
+            somethingWrong: "[↓]一些事情導致消息發送失敗[↓]\n{0}",
+            cantAddGoutG: "無法在私聊添加/修改當前群聊項",
+            cantRmGoutG: "無法在私聊刪除當前群聊項",
+            unkonwnPg: "未知的(多個)許可權組: {0}"
+        },
+        addSuccess: "關鍵詞 {0} (許可權組: {1})添加成功",
+        rmSuccess: "關鍵詞 {0} (許可權組: {1})移除成功",
+        about: "感謝您使用{pn} for {0}, 本外掛程式用於提升 keywords 功能\n作者: 愛喝牛奶の濤哥, 當前版本: {pv}\n開源位址:\n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild",
+        success: "{0} 成功",
+        reload: "嘗試重載入外掛程式",
+        reloadSuccess: "重載成功",
+        reloadFailed: "重載失敗, 錯誤見紀錄",
+        chmHelp: "/alias add <原命令> <命令别名> => 新增命令別名\n/alias rm <原命令> <命令别名> => 刪除命令別名",
+        chm: {
+            addSuccess: "添加命令別名成功 ({0} +=> {1})",
+            rmSuccess: "刪除命令別名成功 ({0} -=> {1})",
+            oldCmdUndefined: "原命令 {0} 不存在",
+            targetExist: "{0} 已在 {1} 別名中存在",
+            targetUnexist: "{0} 不在 {1} 別名中",
+        },
+        updater: {
+            try: "嘗試更新外掛程式 ({pv} -> {0})\n將會在更新完成後自動重載(出錯會自動提示)",
+            updateFailed: "更新外掛程式時發生錯誤, 詳情見錯誤紀錄",
+            disableFailed: "重載外掛程式禁用時出錯: {0}",
+            enableFailed: "重載外掛程式啟用時出錯: {0}",
+            updateSuccess: "外掛程式更新成功, 目前版本: {pv}"
+        },
+        languages: {
+            unknownLang: "未知的語言: {0}, 請檢查輸入是否正確",
+            setSuccess: "設置語言成功: {0}, 已立即生效"
+        }
+    },
     "en-us": {
         "#name": ["English", "English (United States)", "english"],
         header: "〓 {pn} 〓",
