@@ -15,6 +15,10 @@ try {
     var isKivibot = true
 }
 
+const openSourceLink = {
+    pupbot: '\n\thttps://github.com/zhuhansan666/pupbot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/pupbot-plugin-better-keywords-rebuild',
+    kivibot: '\n\thttps://github.com/zhuhansan666/kivibot-plugin-better-keywords-rebuild\n\thttps://www.npmjs.com/package/kivibot-plugin-better-keywords-rebuild'
+}
 const versionApi = `https://registry.npmjs.org/${name}`
 const botRoot = path.join(PluginDataDir, "../../") // 机器人根目录
 const authorQQ = 3088420339
@@ -171,7 +175,9 @@ var TOOLS = {
         }
 
         if (typeof arr == "number" || typeof arr == "string" || typeof arr == "undefined" || typeof arr == 'boolean') {
-            return string.replace('{0}', arr)
+            string = string.replace('{0}', arr)
+            string = string.replace('{pn}', plugin.name).replace('{pv}', plugin.version)
+            return string
         }
 
         try {
@@ -180,8 +186,9 @@ var TOOLS = {
             }
         } catch (error) {
             plugin.logger.error(error)
-            string.replace('{0}', arr)
+            string = string.replace('{0}', arr)
         }
+        string = string.replace('{pn}', plugin.name).replace('{pv}', plugin.version)
 
         return string
     }
@@ -492,7 +499,7 @@ var Commands = {
         }
     },
     about: function(event, params, plugin) {
-        event.reply(TOOLS.formatLang(language.about, language, [isKivibot ? "Kivibot" : "Pupbot"]))
+        event.reply(TOOLS.formatLang(language.about, language, [isKivibot ? "Kivibot" : "Pupbot", isKivibot ? openSourceLink.kivibot : openSourceLink.pupbot]))
     },
     changeCmd: function(event, params, plugin) {
         if (!TOOLS.isAdmin(event, true)) {
@@ -946,11 +953,14 @@ function reloadConfig() {
 function reloadlanguage() {
     language = languages[languageMgr.find(config.lang)]
 }
+
 reloadConfig()
 reloadlanguage()
 
 plugin.onMounted(() => {
-    // hooker(null, null, null, Update.checker) // check update when plugin start
+    setTimeout(() => {
+            hooker(null, null, null, Update.checker) // check update
+        }, 10000) // 延时 10秒检查更新
     try {
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.tips.chlang, language))
         plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
