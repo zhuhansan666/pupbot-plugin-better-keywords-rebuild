@@ -7,7 +7,7 @@ const languages = {
         tips: {
             chlang: "使用 /bkw lang set <语言代号> 设置语言"
         },
-        help: "帮助菜单\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <keyword> <permissonGroup> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
+        help: "帮助菜单\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
         error: "运行发生错误: {0}",
         errors: {
             missArgv: "缺少参数",
@@ -42,7 +42,8 @@ const languages = {
             updateFailed: "更新插件时出错, 详情见错误日志",
             disableFailed: "重载插件禁用时出错: {0}",
             enableFailed: "重载插件启用时出错: {0}",
-            updateSuccess: "插件更新成功, 当前版本: {pv}"
+            updateSuccess: "插件更新成功",
+            tip: "正在检查更新...详见私信",
         },
         languages: {
             unknownLang: "未知的语言: {0}, 请检查输入是否正确",
@@ -56,7 +57,7 @@ const languages = {
         tips: {
             chlang: "使用 /bkw lang set <语言代号> 設置語言"
         },
-        help: "幫助功能表\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <keyword> <permissonGroup> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
+        help: "幫助功能表\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
         error: "執行發生錯誤: {0}",
         errors: {
             missArgv: "缺少參數",
@@ -91,7 +92,8 @@ const languages = {
             updateFailed: "更新外掛程式時發生錯誤, 詳情見錯誤紀錄",
             disableFailed: "重載外掛程式禁用時出錯: {0}",
             enableFailed: "重載外掛程式啟用時出錯: {0}",
-            updateSuccess: "外掛程式更新成功, 目前版本: {pv}"
+            updateSuccess: "外掛程式更新成功",
+            tip: "正在檢查更新...詳見私信",
         },
         languages: {
             unknownLang: "未知的語言: {0}, 請檢查輸入是否正確",
@@ -105,7 +107,7 @@ const languages = {
         tips: {
             chlang: "Use /bkw lang set <language-code> to set language."
         },
-        help: "Help menu\n\t/bkw about -> about information\n\t/bkw lang [list -> show languages;][set -> set language;]\n\t/bkw add <keyword> <permissonGroup> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <keyword> <permissonGroup> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)\n\tinfo Special content :+f -> Turn on fuzzy matching -f -> Turn off fuzzy matching",
+        help: "Help menu\n\t/bkw about -> about information\n\t/bkw lang [list -> show languages;][set -> set language;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <permissonGroup> <keyword> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)\n\tinfo Special content :+f -> Turn on fuzzy matching -f -> Turn off fuzzy matching",
         error: "ERROR: {0}",
         errors: {
             missArgv: "missing parameter",
@@ -140,7 +142,8 @@ const languages = {
             updateFailed: "Try to update plugin error, see the error log for details",
             disableFailed: "Reload plugin disable it error: {0}",
             enableFailed: "Reload plugin enable it error: {0}",
-            updateSuccess: "Plugin update success, now version: {pv}"
+            updateSuccess: "Plugin update success",
+            tip: "Checking for updates...if you want to get info, you must see private messages",
         },
         languages: {
             unknownLang: "Unknown language: {0}, place check the input!",

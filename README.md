@@ -18,18 +18,11 @@
 
 ## 指令
 * `/bkw` 或 `/bkw help` -> 获取帮助
-```
-帮助菜单
-	/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(重启生效);][update or flash -> 更新语言列表;]
-	/bkw add <keyword> <permissonGroup> <info> -> 增加自定义回复
-	/bkw rm <keyword> <permissonGroup> -> 删除自定义回复
-	permissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)
-	info特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配
-```
 * `/bkw lang set <lang-code>` -> 设置语言 (例如 改为中文: `/bkw lang set zh-cn`)
 * `/bkw add` / `rm` -> 添加 / 删除关键字 (例如 设置`test`所有群聊和人都回复`你好<换行>我在哦~`并开启模糊匹配: `/bkw add test g 你好\n我在哦~ +f`)
 * `/bkw about` -> 关于界面
 * `/bkw reload` 或 `rl` -> 重载插件
+* `/bkw update` 或 `up` -> 检查更新
 
 ## 特色
 * 支持QQ发送图片并添加到回复内容中*

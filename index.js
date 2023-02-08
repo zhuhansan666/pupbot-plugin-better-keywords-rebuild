@@ -12,6 +12,7 @@ try {
     var isKivibot = false
 } catch (error) {
     var { disablePlugin, enablePlugin, install, NodeModulesDir, KiviPlugin, PluginDataDir, KiviConf, axios } = require('@kivibot/core')
+    var PupConf = KiviConf // 定义Kivibot为PupConf避免引用失败
     var isKivibot = true
 }
 
@@ -149,14 +150,26 @@ var TOOLS = {
         let _this = thisVer.toString().split('.')
         for (let i = 0; i < _arr.length; i++) {
             try {
-                if (parseInt(_this[i]) < parseInt(_arr[i])) {
-                    return false
-                }
+                _arr[i] = parseInt(_arr[i])
+                _this[i] = parseInt(_this[i])
             } catch (error) {
                 plugin.logger.warn(`Compare version warn: ${error.stack}`)
             }
         }
-        return true
+
+        if (_arr[0] > _this[0]) {
+            return true
+        } else if (_arr[0] == _this[0]) {
+            if (_arr[1] > _this[1]) {
+                return true
+            } else if (_arr[1] == _this[1]) {
+                if (_arr[2] >= _this[2]) {
+                    return true
+                }
+            }
+        }
+
+        return false
     },
     escape: function(string) {
         string = string.replace('\\n', '\n').replace('\\t', '\t')
@@ -397,8 +410,9 @@ var Commands = {
         }
 
         command = command.toLowerCase()
+        console.log(command)
         if (command == 'add') { // 增加
-            let [_, keyname, permisson] = params
+            let [_, permisson, keyname] = params
             let info = (params.slice(3, params.length))
             if (!(keyname && permisson && info)) {
                 event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
@@ -421,7 +435,7 @@ var Commands = {
             event.reply(TOOLS.formatLang(language.addSuccess, language, [keyname, permissonGroups]), true)
 
         } else if (command == 'rm') { // 删除
-            let [_, keyname, permisson] = params
+            let [_, permisson, keyname] = params
             if (!(keyname && permisson)) {
                 event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
                 event.reply(TOOLS.formatLang(language.help, language))
@@ -488,14 +502,20 @@ var Commands = {
                 event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.unknownCmd, undefined, arr = secCommand, header = false), true))
                 event.reply(TOOLS.formatLang(language.help))
             }
-        } else if (command == 'rl' || command == 'reload') {
+        } else if (command == 'rl' || command == 'reload') { // 重载
             event.reply(TOOLS.formatLang(language.reload, language), true)
-            let result = await Update.reloadPlugin(name, path.join(NodeModulesDir, name), false)
+            let result = await Update.reloadPlugin(name, __dirname, false)
             if (result) {
                 event.reply(TOOLS.formatLang(language.reloadSuccess, language), true)
                 return
             }
             event.reply(TOOLS.formatLang(language.reloadFailed, language), true)
+        } else if (command == 'up' || command == 'update') {
+            console.log(TOOLS.formatLang(language.updater.tip, language))
+            event.reply(TOOLS.formatLang(language.updater.tip, language))
+            Update.checker()
+        } else {
+            event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.unknownCmd, undefined, command, false)))
         }
     },
     about: function(event, params, plugin) {
@@ -905,7 +925,7 @@ var Update = {
             return false
         }
 
-        if (msg) {
+        if (_msg) {
             _bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language))
         }
         return true
@@ -962,7 +982,7 @@ plugin.onMounted(() => {
             hooker(null, null, null, Update.checker) // check update
         }, 10000) // 延时 10秒检查更新
     try {
-        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.tips.chlang, language))
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.tips.chlang, language)) // 发送提示更换语言信息
         plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
         plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
         plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
