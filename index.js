@@ -157,13 +157,13 @@ var TOOLS = {
             }
         }
 
-        if (_arr[0] > _this[0]) {
+        if (_this[0] > _arr[0]) {
             return true
-        } else if (_arr[0] == _this[0]) {
-            if (_arr[1] > _this[1]) {
+        } else if (_this[0] == _arr[0]) {
+            if (_this[1] > _arr[1]) {
                 return true
-            } else if (_arr[1] == _this[1]) {
-                if (_arr[2] >= _this[2]) {
+            } else if (_this[1] == _arr[1]) {
+                if (_this[2] >= _arr[2]) {
                     return true
                 }
             }
@@ -214,6 +214,21 @@ const permissonType = {
     'u': { code: 'global-g', msg: { 'zh-cn': '所有群聊', 'en-us': 'all groups', 'zh-tw': '所有群聊' } },
     'f': { code: 'global-f', msg: { 'zh-cn': '所有私信', 'en-us': 'all friends', 'zh-tw': '所有私信' } },
     'g': { code: 'global', msg: { 'zh-cn': '所有群聊和私信', 'en-us': 'all groups and friends(global)', 'zh-tw': '所有群聊和私信(全域)' } },
+}
+
+var Toys = {
+    getTotleDownloads: async function(pkgname) {
+        let _date = new Date()
+        let nowDate = `${_date.getFullYear()}-${_date.getMonth() + 1}-${_date.getDate()}`
+        let api = `https://api.npmjs.org/downloads/point/1970-01-01:${nowDate}/${pkgname}`
+        let data = {}
+        try {
+            data = await (await axios.get(api, header = UAheaders)).data
+        } catch (error) {}
+        let downloads = data.downloads
+
+        return downloads == undefined ? -1 : downloads
+    }
 }
 
 var languageMgr = {
@@ -869,7 +884,7 @@ var Update = {
             language.updater.try, language, latestVersion
         )
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
-        plugin.logger.debug(`${msg}`)
+        plugin.logger.debug(`will update:\n${msg}`)
 
         try {
             let status = await Update.reInstall(name)
@@ -877,7 +892,7 @@ var Update = {
                 plugin.logger.warn(`↑↑↑reInstall(update) pkg failed↑↑↑`)
             }
         } catch (error) {
-            plugin.logger.warn(`reInstall(update) pkg warn: ${error.stack}`)
+            plugin.logger.warn(`reInstall(update) pkg warn:\n${error.stack}`)
         }
 
         // oldVersion = true
@@ -977,12 +992,9 @@ function reloadlanguage() {
 reloadConfig()
 reloadlanguage()
 
-plugin.onMounted(() => {
-    setTimeout(() => {
-            hooker(null, null, null, Update.checker) // check update
-        }, 10000) // 延时 10秒检查更新
+plugin.onMounted(async() => {
     try {
-        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.tips.chlang, language)) // 发送提示更换语言信息
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.welcome, language, await (Toys.getTotleDownloads(name)))) // 发送提示更换语言信息
         plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
         plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
         plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
@@ -993,6 +1005,9 @@ plugin.onMounted(() => {
         console.log(`At ${plugin.name}.onMounted Error: ${error.stack}`)
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, `At ${plugin.name}.onMounted Error: ${error.stack}`)
     }
+    setTimeout(() => {
+            hooker(null, null, null, Update.checker) // check update
+        }, 10000) // 延时 10秒检查更新
 })
 
 module.exports = { plugin }

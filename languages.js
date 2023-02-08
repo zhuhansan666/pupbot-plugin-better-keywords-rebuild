@@ -4,9 +4,7 @@ const languages = {
         "#name": ["简中", "中文简体", "chinese", "chinese (Chinese mainland)"],
         header: '〓 {pn} 〓',
         bugReport: "是谁都可能会遇到困难的...\n尝试运行函数 {0} 发生了没有预料的错误:\n{1}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 {pn}:bug)",
-        tips: {
-            chlang: "使用 /bkw lang set <语言代号> 设置语言"
-        },
+        welcome: "欢迎使用 {pn} - {pv}, 您与{0}人做出了同样的选择\n使用 /bkw lang set <语言代号> 设置语言",
         help: "帮助菜单\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
         error: "运行发生错误: {0}",
         errors: {
@@ -54,9 +52,7 @@ const languages = {
         "#name": ["繁中", "中文繁体", "chinese (traditional)", "chinese (Taiwan of China)", "traditional"],
         header: '〓 {pn} 〓',
         bugReport: "是誰都可能會遇到困難的...\n嘗試運行函數 {0} 發生了沒有預料的錯誤:\n{1}\n(如有需要請發送郵件至開發者 public.zhuhansan666@outlook.com 備註 {pn}:bug)",
-        tips: {
-            chlang: "使用 /bkw lang set <语言代号> 設置語言"
-        },
+        welcome: "歡迎使用{pn} - {pv}, 您與{0}人做出了同樣的選擇\n使用/bkw lang set <語言代號> 設定語言",
         help: "幫助功能表\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
         error: "執行發生錯誤: {0}",
         errors: {
@@ -104,9 +100,7 @@ const languages = {
         "#name": ["English", "English (United States)", "english"],
         header: "〓 {pn} 〓",
         bugReport: "Anyone may encounter difficulties...\nWhen try to run function {0}, an unexpected mistake has occurred:\n{1}\n(if necessary, please send email to developer public.zhuhansan666@outlook.com remarks {pn}: bug)",
-        tips: {
-            chlang: "Use /bkw lang set <language-code> to set language."
-        },
+        welcome: "Welcome to use the plugin {pn} - {pv}, You made the same choice as {0} people.\nUse /bkw lang set <language-code> to set the language.",
         help: "Help menu\n\t/bkw about -> about information\n\t/bkw lang [list -> show languages;][set -> set language;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <permissonGroup> <keyword> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)\n\tinfo Special content :+f -> Turn on fuzzy matching -f -> Turn off fuzzy matching",
         error: "ERROR: {0}",
         errors: {
