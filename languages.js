@@ -1,11 +1,11 @@
 const languages = {
     defualt: "en-us",
     "zh-cn": {
-        "#name": ["简中", "中文简体", "chinese", "chinese (Chinese mainland)"],
+        "#name": ["简中", "中文简体", "chinese", "chinese (simplified)"],
         header: '〓 {pn} 〓',
         bugReport: "是谁都可能会遇到困难的...\n尝试运行函数 {0} 发生了没有预料的错误:\n{1}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 {pn}:bug)",
         welcome: "欢迎使用 {pn} - {pv}, 您与{0}人做出了同样的选择\n使用 /bkw lang set <语言代号> 设置语言",
-        help: "帮助菜单\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
+        help: "帮助菜单\n\t/bkw update 或 up -> 检查更新\n\t/bkw reload 或 rl -> 重载插件\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
         error: "运行发生错误: {0}",
         errors: {
             missArgv: "缺少参数",
@@ -36,7 +36,7 @@ const languages = {
             targetUnexist: "{0} 不在 {1} 别名中",
         },
         updater: {
-            try: "尝试更新插件 ({pv} -> {0})\n将会在更新完成后自动重载(出错会自动提示)\n海内存知己, 天涯若比邻\n    请不要关闭计算机\n  这可能需要几个世纪",
+            try: "尝试更新插件 ({pv} -> {0})\n将会在更新完成后自动重载(出错会自动提示)\n海内存知己, 天涯若比邻\n    请不要关闭计算机\n这可能需要几个世纪, 请坐和放宽",
             isUpdating: "已有一个更新函数运行, 本函数已退出",
             isLatest: "当前插件为最新版本或插件版本高于最新版本 (当前插件版本: {pv})",
             installFailed: "安装插件时出错, 详情见错误日志",
@@ -58,7 +58,7 @@ const languages = {
         header: '〓 {pn} 〓',
         bugReport: "是誰都可能會遇到困難的...\n嘗試運行函數 {0} 發生了沒有預料的錯誤:\n{1}\n(如有需要請發送郵件至開發者 public.zhuhansan666@outlook.com 備註 {pn}:bug)",
         welcome: "歡迎使用{pn} - {pv}, 您與{0}人做出了同樣的選擇\n使用/bkw lang set <語言代號> 設定語言",
-        help: "幫助功能表\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
+        help: "幫助功能表\n\t/bkw update 或 up ->檢查更新\n\t/bkw reload 或 rl ->重載挿件\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
         error: "執行發生錯誤: {0}",
         errors: {
             missArgv: "缺少參數",
@@ -111,7 +111,7 @@ const languages = {
         header: "〓 {pn} 〓",
         bugReport: "Anyone may encounter difficulties...\nWhen try to run function {0}, an unexpected mistake has occurred:\n{1}\n(if necessary, please send email to developer public.zhuhansan666@outlook.com remarks {pn}: bug)",
         welcome: "Welcome to use the plugin {pn} - {pv}, You made the same choice as {0} people.\nUse /bkw lang set <language-code> to set the language.",
-        help: "Help menu\n\t/bkw about -> about information\n\t/bkw lang [list -> show languages;][set -> set language;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <permissonGroup> <keyword> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)\n\tinfo Special content :+f -> Turn on fuzzy matching -f -> Turn off fuzzy matching",
+        help: "Help menu\n\t/bkw update or up -> check for updates\n\t/bkw reload or rl -> reload\n\t/bkw about -> about information\n\t/bkw lang [list -> show languages;][set -> set language;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <permissonGroup> <keyword> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)\n\tinfo Special content :+f -> Turn on fuzzy matching -f -> Turn off fuzzy matching",
         error: "ERROR: {0}",
         errors: {
             missArgv: "missing parameter",

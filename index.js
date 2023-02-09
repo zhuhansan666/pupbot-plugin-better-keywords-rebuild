@@ -545,6 +545,7 @@ var Commands = {
         if (!command) {
             event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.cantEmpty, undefined, arr = 'command', header = false)), true)
             event.reply(TOOLS.formatLang(language.chmHelp, language))
+            return
         }
 
         command = command.toLowerCase()
