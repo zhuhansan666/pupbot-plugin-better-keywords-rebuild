@@ -869,8 +869,10 @@ var Update = {
 
         if (isUpdating) {
             let msg = TOOLS.formatLang(language.updater.isUpdating, language)
-            _bot.sendPrivateMsg(mainAdmin, msg)
             plugin.logger.debug(`is updating, exit Update.checker(), msg:\n${msg}`)
+            if (sendMsg) {
+                _bot.sendPrivateMsg(mainAdmin, msg)
+            }
             return
         }
         isUpdating = true
@@ -910,13 +912,14 @@ var Update = {
         try {
             let status = await Update.reInstall(name)
             if (!status) {
+                isUpdating = false
                 plugin.logger.warn(`↑↑↑reInstall(update) pkg failed↑↑↑`)
             } else {
+                isUpdating = false
                 config.updateAtLast.status = true // 设置上次更新为true
                 config.updateAtLast.success = true // 更新成功
                 plugin.saveConfig(config)
             }
-            isUpdating = false
         } catch (error) {
             isUpdating = false
             let msg = TOOLS.formatLang(
