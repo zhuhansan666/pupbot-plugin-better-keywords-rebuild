@@ -7,6 +7,7 @@ const path = require('path')
 const { segment } = require("oicq")
 const { name, version } = require('./package.json')
 const { languages } = require('./languages')
+const { changes } = require('./changes')
 try {
     var { disablePlugin, enablePlugin, install, NodeModulesDir, PupPlugin, PluginDataDir, PupConf, axios } = require('@pupbot/core')
     var isKivibot = false
@@ -29,6 +30,7 @@ const UAheaders = {
 }
 
 const config = {
+    "updateAtLast": { "status": false, "success": true },
     "lang": "en-us",
     "keywords": {
         "groups": {},
@@ -425,7 +427,6 @@ var Commands = {
         }
 
         command = command.toLowerCase()
-        console.log(command)
         if (command == 'add') { // 增加
             let [_, permisson, keyname] = params
             let info = (params.slice(3, params.length))
@@ -519,16 +520,15 @@ var Commands = {
             }
         } else if (command == 'rl' || command == 'reload') { // 重载
             event.reply(TOOLS.formatLang(language.reload, language), true)
-            let result = await Update.reloadPlugin(name, __dirname, false)
+            let result = await Update.reloadPlugin(plugin, __dirname, false)
             if (result) {
                 event.reply(TOOLS.formatLang(language.reloadSuccess, language), true)
                 return
             }
             event.reply(TOOLS.formatLang(language.reloadFailed, language), true)
         } else if (command == 'up' || command == 'update') {
-            console.log(TOOLS.formatLang(language.updater.tip, language))
             event.reply(TOOLS.formatLang(language.updater.tip, language))
-            Update.checker()
+            Update.checker(true)
         } else {
             event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.unknownCmd, undefined, command, false)))
         }
@@ -860,7 +860,7 @@ var Listener = {
 }
 
 var Update = {
-    checker: async function() {
+    checker: async function(sendMsg) {
         // if (oldVersion) { //是老旧的版本退出
         //     return
         // }
@@ -877,8 +877,18 @@ var Update = {
         }
         if (TOOLS.checkVersion(latestVersion, version)) { // 是最新版本退出
             plugin.logger.debug(`is the latest version. this: ${version} latest: ${latestVersion}`)
+            if (sendMsg) {
+                let msg = TOOLS.formatLang(
+                    language.updater.isLatest, language
+                )
+                plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+            }
             return
         }
+
+        config.updateAtLast.success = false // 默认失败
+        config.updateAtLast.status = true // 设置上次更新为true
+        plugin.saveConfig(config)
 
         let msg = TOOLS.formatLang(
             language.updater.try, language, latestVersion
@@ -890,6 +900,9 @@ var Update = {
             let status = await Update.reInstall(name)
             if (!status) {
                 plugin.logger.warn(`↑↑↑reInstall(update) pkg failed↑↑↑`)
+            } else {
+                config.updateAtLast.success = true // 更新成功
+                plugin.saveConfig(config)
             }
         } catch (error) {
             plugin.logger.warn(`reInstall(update) pkg warn:\n${error.stack}`)
@@ -901,8 +914,8 @@ var Update = {
         let result = await install(pkg)
 
         if (!result) {
-            plugin.logger.warn(language.updater.updateFailed)
-            plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.updater.updateFailed, language))
+            plugin.logger.warn(language.updater.installFailed)
+            plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.updater.installFailed, language))
             return false
         }
 
@@ -910,22 +923,22 @@ var Update = {
             return true
         }
 
-        let status = Update.reloadPlugin(plugin, path.join(NodeModulesDir, name)) // 重加载插件
+        let status = Update.reloadPlugin(plugin, __dirname) // 重加载插件
         if (!status) {
             return false
         }
 
         return true
     },
-    reloadPlugin: async function(pname, ppath, _msg = true) {
+    reloadPlugin: async function(pObj, ppath, _msg = true) {
         const _bot = plugin.bot
         let mainAdmin = plugin.mainAdmin
-        let disableResult = await disablePlugin(_bot, PupConf, pname, ppath)
+        let disableResult = await disablePlugin(_bot, PupConf, pObj, ppath)
         if (!(disableResult === true)) {
             if (!_msg) {
                 return false
             }
-            let = TOOLS.formatLang(language.updater.disableFailed, language, [disableResult])
+            let msg = TOOLS.formatLang(language.updater.disableFailed, language, [disableResult])
             _bot.sendPrivateMsg(mainAdmin, msg)
             return false
         }
@@ -940,9 +953,6 @@ var Update = {
             return false
         }
 
-        if (_msg) {
-            _bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language))
-        }
         return true
     }
 }
@@ -989,12 +999,37 @@ function reloadlanguage() {
     language = languages[languageMgr.find(config.lang)]
 }
 
+function getUpdateStatus() {
+    if (config.updateAtLast) {
+        if (config.updateAtLast.status) {
+            return config.updateAtLast.success
+        }
+        return undefined
+    }
+
+    return null
+}
+
 reloadConfig()
 reloadlanguage()
 
 plugin.onMounted(async() => {
     try {
-        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.welcome, language, await (Toys.getTotleDownloads(name)))) // 发送提示更换语言信息
+        let mainAdmin = plugin.mainAdmin
+        let updateStatus = getUpdateStatus()
+        if (updateStatus === undefined) { // 上次未更新
+            // 什么也不干
+        } else if (updateStatus === true) { // 更新成功
+            plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language, changes[version]))
+        } else if (updateStatus === false) { // 更新失败
+            plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateFailed, language))
+        } else { // 更新状态获取失败
+            plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.unknownStatus, language))
+        }
+        config.updateAtLast = { 'status': false, 'success': false } // 重写更新状态
+        plugin.saveConfig(config)
+
+        plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.welcome, language, await (Toys.getTotleDownloads(name)))) // 发送welcome信息
         plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
         plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
         plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
