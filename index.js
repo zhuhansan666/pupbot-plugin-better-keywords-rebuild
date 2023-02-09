@@ -1,6 +1,6 @@
 const debug = false
     // var oldVersion = false
-
+var isUpdating = false
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('path')
@@ -864,6 +864,17 @@ var Update = {
         // if (oldVersion) { //是老旧的版本退出
         //     return
         // }
+        let _bot = plugin.bot
+        let mainAdmin = plugin.mainAdmin
+
+        if (isUpdating) {
+            let msg = TOOLS.formatLang(language.updater.isUpdating, language)
+            _bot.sendPrivateMsg(mainAdmin, msg)
+            plugin.logger.debug(`is updating, exit Update.checker(), msg:\n${msg}`)
+            return
+        }
+        isUpdating = true
+
         plugin.logger.debug(`try to check version`)
         let latestVersion = "0.0.0"
         let { data } = await (axios.get(versionApi, headers = UAheaders))
@@ -881,19 +892,19 @@ var Update = {
                 let msg = TOOLS.formatLang(
                     language.updater.isLatest, language
                 )
-                plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+                _bot.sendPrivateMsg(mainAdmin, msg)
             }
             return
         }
 
-        config.updateAtLast.success = false // 默认失败
         config.updateAtLast.status = true // 设置上次更新为true
+        config.updateAtLast.success = false // 默认失败
         plugin.saveConfig(config)
 
         let msg = TOOLS.formatLang(
             language.updater.try, language, latestVersion
         )
-        plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+        _bot.sendPrivateMsg(mainAdmin, msg)
         plugin.logger.debug(`will update:\n${msg}`)
 
         try {
@@ -901,11 +912,22 @@ var Update = {
             if (!status) {
                 plugin.logger.warn(`↑↑↑reInstall(update) pkg failed↑↑↑`)
             } else {
+                config.updateAtLast.status = true // 设置上次更新为true
                 config.updateAtLast.success = true // 更新成功
                 plugin.saveConfig(config)
             }
+            isUpdating = false
         } catch (error) {
-            plugin.logger.warn(`reInstall(update) pkg warn:\n${error.stack}`)
+            isUpdating = false
+            let msg = TOOLS.formatLang(
+                language.updater.updateError, language, `\n${error.stack}`
+            )
+            try {
+                _bot.sendPrivateMsg(mainAdmin, msg)
+            } catch (error) {}
+            plugin.logger.warn(`${language.header.replace(
+                '{pn}', plugin.name
+            )}\nreInstall(update) pkg warn:\n${error.stack}`)
         }
 
         // oldVersion = true
@@ -1020,7 +1042,8 @@ plugin.onMounted(async() => {
         if (updateStatus === undefined) { // 上次未更新
             // 什么也不干
         } else if (updateStatus === true) { // 更新成功
-            plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language, changes[version]))
+            let changeInfo = changes[version]
+            plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language, changeInfo != undefined ? changeInfo : ""))
         } else if (updateStatus === false) { // 更新失败
             plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateFailed, language))
         } else { // 更新状态获取失败
