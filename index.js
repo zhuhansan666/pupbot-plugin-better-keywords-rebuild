@@ -429,6 +429,7 @@ var Commands = {
         if (command == 'add') { // 增加
             let [_, permisson, keyname] = params
             let info = (params.slice(3, params.length))
+            console.log(info.length)
             if (!(keyname && permisson && info)) {
                 event.reply(TOOLS.formatLang(language.error, language, [language.errors.missArgv]), true)
                 event.reply(TOOLS.formatLang(language.help, language))
@@ -895,6 +896,7 @@ var Update = {
             plugin.logger.warn(`get latest version warn: ${error.stack}`)
         }
         if (TOOLS.checkVersion(latestVersion, version)) { // 是最新版本退出
+            isUpdating = false
             plugin.logger.debug(`is the latest version. this: ${version} latest: ${latestVersion}`)
             if (sendMsg) {
                 let msg = TOOLS.formatLang(

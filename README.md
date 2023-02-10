@@ -21,7 +21,7 @@
 
 ## 指令
 * `/bkw` 或 `/bkw help` -> 获取帮助
-* `/bkw lang set <lang-code>` -> 设置语言 (例如 改为中文: `/bkw lang set zh-cn`)
+* `/bkw lang set <lang-code>` -> 设置语言 (例如 改为简体中文: `/bkw lang set 简中`; 改为繁体中文: `/bkw lang set 繁中`; 改为英文: `/bkw lang set en-us`; )
 * `/bkw add` / `rm` -> 添加 / 删除关键字 (例如 设置`test`所有群聊和人都回复`你好<换行>我在哦~`并开启模糊匹配: `/bkw add test g 你好\n我在哦~ +f`)
 * `/bkw about` -> 关于界面
 * `/bkw reload` 或 `rl` -> 重载插件
@@ -84,6 +84,7 @@
 - [x] \n \t 不会替换为 换行符 制表符
 - [x] 版本重复更新(npm缓存未刷新)
 - [x] 插件重载和自动更新问题
+- [x] 自动更新如果当前版本是最新版本则下次无法手动更新
 
 ## 大版本看点
 * V3.0.0 新增模糊匹配(详见`/bkw help`)
