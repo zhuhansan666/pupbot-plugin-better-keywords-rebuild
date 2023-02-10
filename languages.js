@@ -5,7 +5,7 @@ const languages = {
         header: '〓 {pn} 〓',
         bugReport: "是谁都可能会遇到困难的...\n尝试运行函数 {0} 发生了没有预料的错误:\n{1}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 {pn}:bug)",
         welcome: "欢迎使用 {pn} - {pv}, 您与{0}人做出了同样的选择\n使用 /bkw lang set <语言代号> 设置语言",
-        help: "帮助菜单\n\t/bkw update 或 up -> 检查更新\n\t/bkw reload 或 rl -> 重载插件\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
+        help: "帮助菜单\n\t/bkw alias 或 as add/remove/a/rm <原命令> <别名> -> 新增/删除命令别名\n\t/bkw update 或 up -> 检查更新\n\t/bkw reload 或 rl -> 重载插件\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
         error: "运行发生错误: {0}",
         errors: {
             missArgv: "缺少参数",
@@ -38,7 +38,7 @@ const languages = {
         updater: {
             try: "尝试更新插件 ({pv} -> {0})\n将会在更新完成后自动重载(出错会自动提示)\n海内存知己, 天涯若比邻\n    请不要关闭计算机\n这可能需要几个世纪, 请坐和放宽",
             isUpdating: "已有一个更新函数运行, 本函数已退出",
-            isLatest: "当前插件为最新版本或插件版本高于最新版本 (当前插件版本: {pv})",
+            isLatest: "您是最新的!\n当前插件已为最新版本 (当前插件版本: {pv})\n注: 插件版本高于最新版本也会显示本消息",
             installFailed: "安装插件时出错, 详情见错误日志",
             disableFailed: "重载插件禁用时出错: {0}",
             enableFailed: "重载插件启用时出错: {0}",
@@ -58,7 +58,7 @@ const languages = {
         header: '〓 {pn} 〓',
         bugReport: "是誰都可能會遇到困難的...\n嘗試運行函數 {0} 發生了沒有預料的錯誤:\n{1}\n(如有需要請發送郵件至開發者 public.zhuhansan666@outlook.com 備註 {pn}:bug)",
         welcome: "歡迎使用{pn} - {pv}, 您與{0}人做出了同樣的選擇\n使用/bkw lang set <語言代號> 設定語言",
-        help: "幫助功能表\n\t/bkw update 或 up ->檢查更新\n\t/bkw reload 或 rl ->重載挿件\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
+        help: "幫助功能表\n\t/bkw update 或 up ->檢查更新\n\t/bkw reload 或 rl ->重載外掛程式\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
         error: "執行發生錯誤: {0}",
         errors: {
             missArgv: "缺少參數",
@@ -91,7 +91,7 @@ const languages = {
         updater: {
             try: "嘗試更新外掛程式 ({pv} -> {0})\n將會在更新完成後自動重載(出錯會自動提示)",
             isUpdating: "已有一個更新函數運行, 本函數已退出",
-            isLatest: "當前挿件為最新版本或挿件版本高於最新版本 (當前外掛程式版本: {pv})",
+            isLatest: "您是最新的!\n當前外掛程式已為最新版本 (當前外掛程式版本：{pv})\n注：外掛程式版本高於最新版本也會顯示本消息",
             installFailed: "安裝外掛程式時發生錯誤, 詳情見錯誤紀錄",
             disableFailed: "重載外掛程式禁用時出錯: {0}",
             enableFailed: "重載外掛程式啟用時出錯: {0}",
@@ -144,7 +144,7 @@ const languages = {
         updater: {
             try: "try to update plugin ({pv} -> {0})\nIt will auto reload when install update successful(If error in this, it will auto send message to you)",
             isUpdating: "There is already an update function running, this function has exited.",
-            isLatest: "The current plugin is the latest version or the plugin version is higher than the latest version (Current plugin version: {pv})",
+            isLatest: "You are the latest!\nThe current plugin is the latest version (current plug-in version: {pv})\nNotes: This message will also be displayed if the plugin version is higher than the latest version",
             installFailed: "Try to install plugin error, see the error log for details",
             disableFailed: "Reload plugin disable it error: {0}",
             enableFailed: "Reload plugin enable it error: {0}",

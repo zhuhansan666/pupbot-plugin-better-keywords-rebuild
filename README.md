@@ -1,6 +1,9 @@
 ## 更好的关键词回复-重制版 | pupbot-plugin-better-keywords-rebuild / kivibot-plugin-better-keywords-rebuild
 ## 用于自定义关键字并回复(有分群、私聊功能)
 
+[![npm-version](https://img.shields.io/npm/v/pupbot-plugin-better-keywords-rebuild?color=527dec&label=pupbot-plugin-better-keywords-rebuild&style=flat-square)](https://npm.im/pupbot-plugin-better-keywords-rebuild) [![dm](https://shields.io/npm/dm/pupbot-plugin-better-keywords-rebuild?style=flat-square)](https://npm.im/pupbot-plugin-better-keywords-rebuild)
+交流反馈群: <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=kYuPTlWnpv2JYpH_7PX_7Gct5A-CaLak&jump_from=webapi&authKey=xHpTweFarFYr878W2gFyyuWGoySD9eRacy150RDk8SOwJHaV6jXUYbcQ8UucDmTv"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="better-keyword-rebuild交流" title="better-keyword-rebuild交流"></a> 群号: `652833880`
+
 ## 安装
 ```
 /plugin add better-keywords-rebuild
@@ -23,6 +26,7 @@
 * `/bkw about` -> 关于界面
 * `/bkw reload` 或 `rl` -> 重载插件
 * `/bkw update` 或 `up` -> 检查更新
+* `/bkw alias` 或 `as add/remove/a/rm <原命令> <别名>` -> 新增/删除命令别名
 
 ## 特色
 * 支持QQ发送图片并添加到回复内容中*
@@ -30,7 +34,7 @@
 <!-- * 支持加载js脚本(自动调用main函数) *[js脚本开发文档](./jsdocxs/START.md)* -->
 <!-- * 支持js脚本热加载(在调用前自动刷新) -->
 <!-- * 支持js脚本使用 oicq 的 segment 等内置方法发送消息 -->
-* 支持自定义提示文本(在插件安装目录`./language/<lang-code>.json`中)
+* 支持自定义提示文本(在插件安装目录`./languages.js`中)
 
 ## 配置文件详解
 ```
@@ -49,15 +53,31 @@
 ```
 <!-- * 兼容 `{<key>: <value>}`, 默认type为text(仅文本) -->
 
-## 问题 / 不合理设定 (√代表已修复)
-- [x] 在首次创建群聊项时创建群聊子键失败  (由Q '蓝衒' 提供反馈)
-- [x] 在g模式下`globalFriendsValue is not defined`  (由QQ '蓝衒' 提供反馈)
-- [x] 删除用于调试的错误 `throw '这是一个错误'` (原 Line350)  (本人发现)
-- [x] 修改`/bkwabout`设定以避免刷屏(`about`已移步`/bkw about`)
+
+## 已知异常但未修复的问题
+* 未知原因导致再`kivibot`自动更新异常
+  ```
+  插件better-keywords-rebui1d禁用过程中发生错误:
+  Cannot read properties of undefined (reading 'admins')
+  ReferenceError: msg is not defined
+    at Object.reloadPlugin (D:\QQ机器人\KiviBot\node_modules\kivibot-plugin-better-keywords-rebuild\index.js:929:44)
+    at process.processTicksAndRejections (node:internal/process/task queues:95:5)
+
+  msg is not defined
+  ```
+  反馈者: QQ@山重水复
+
+
+
+## 已修复的问题 / 已修复的不合理设定
+- [x] 在首次创建群聊项时创建群聊子键失败  (反馈者: QQ@蓝衒)
+- [x] 在g模式下`globalFriendsValue is not defined`  (反馈者: QQ@蓝衒)
+- [x] 删除用于调试的错误 `throw '这是一个错误'`
+- [x] 修改`/bkwabout`设定以避免刷屏(`about` 已移步 `/bkw about`)
 - [x] 使用QQ消息指令设置语言无效
 - [x] 语言文件未找到
 - [x] `TypeError: value.includes is not a function`
-- [x] `ReferenceError: globalFriendsValue is not defined` (Line603 Font52)
+- [x] `ReferenceError: globalFriendsValue is not defined`
 - [x] \n 不会替换为 换行
 - [x] 版本比较问题
 - [x] 检查更新失效

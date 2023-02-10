@@ -9,11 +9,10 @@ const { name, version } = require('./package.json')
 const { languages } = require('./languages')
 const { changes } = require('./changes')
 try {
-    var { disablePlugin, enablePlugin, install, NodeModulesDir, PupPlugin, PluginDataDir, PupConf, axios } = require('@pupbot/core')
+    var { disablePlugin, enablePlugin, install, PupPlugin, PluginDataDir, PupConf, axios } = require('@pupbot/core')
     var isKivibot = false
 } catch (error) {
-    var { disablePlugin, enablePlugin, install, NodeModulesDir, KiviPlugin, PluginDataDir, KiviConf, axios } = require('@kivibot/core')
-    var PupConf = KiviConf // 定义Kivibot为PupConf避免引用失败
+    var { disablePlugin, enablePlugin, install, KiviPlugin, PluginDataDir, KiviConf, axios } = require('@kivibot/core')
     var isKivibot = true
 }
 
@@ -526,9 +525,12 @@ var Commands = {
                 return
             }
             event.reply(TOOLS.formatLang(language.reloadFailed, language), true)
-        } else if (command == 'up' || command == 'update') {
+        } else if (command == 'up' || command == 'update') { //更新 
             event.reply(TOOLS.formatLang(language.updater.tip, language))
             Update.checker(true)
+        } else if (command == 'as' || command == 'alias') { // 别名
+            let _params = params.slice(1, params.length) // 更改格式 [botCmd, oldCmd, alias]
+            Commands.changeCmd(event, _params, plugin) // 直接call chm
         } else {
             event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.unknownCmd, undefined, command, false)))
         }
@@ -861,14 +863,14 @@ var Listener = {
 }
 
 var Update = {
-    checker: async function(sendMsg) {
+    checker: async function(sendMsg, background) {
         // if (oldVersion) { //是老旧的版本退出
         //     return
         // }
         let _bot = plugin.bot
         let mainAdmin = plugin.mainAdmin
 
-        if (isUpdating) {
+        if (isUpdating && !background) { // 正在更新且不是后台更新
             let msg = TOOLS.formatLang(language.updater.isUpdating, language)
             plugin.logger.debug(`is updating, exit Update.checker(), msg:\n${msg}`)
             if (sendMsg) {
@@ -876,7 +878,10 @@ var Update = {
             }
             return
         }
-        isUpdating = true
+
+        if (!background) {
+            isUpdating = true
+        }
 
         plugin.logger.debug(`try to check version`)
         let latestVersion = "0.0.0"
@@ -911,18 +916,21 @@ var Update = {
         plugin.logger.debug(`will update:\n${msg}`)
 
         try {
+            if (!background) {
+                isUpdating = false
+            }
             let status = await Update.reInstall(name)
             if (!status) {
-                isUpdating = false
                 plugin.logger.warn(`↑↑↑reInstall(update) pkg failed↑↑↑`)
             } else {
-                isUpdating = false
                 config.updateAtLast.status = true // 设置上次更新为true
                 config.updateAtLast.success = true // 更新成功
                 plugin.saveConfig(config)
             }
         } catch (error) {
-            isUpdating = false
+            if (!background) {
+                isUpdating = false
+            }
             let msg = TOOLS.formatLang(
                 language.updater.updateError, language, `\n${error.stack}`
             )
@@ -959,7 +967,7 @@ var Update = {
     reloadPlugin: async function(pObj, ppath, _msg = true) {
         const _bot = plugin.bot
         let mainAdmin = plugin.mainAdmin
-        let disableResult = await disablePlugin(_bot, PupConf, pObj, ppath)
+        let disableResult = await disablePlugin(_bot, isKivibot ? KiviConf : PupConf, pObj, ppath)
         if (!(disableResult === true)) {
             if (!_msg) {
                 return false
@@ -968,7 +976,7 @@ var Update = {
             _bot.sendPrivateMsg(mainAdmin, msg)
             return false
         }
-        let enableResult = await enablePlugin(_bot, PupConf, ppath)
+        let enableResult = await enablePlugin(_bot, isKivibot ? KiviConf : PupConf, ppath)
         if (!(enableResult === true)) {
             if (!_msg) {
                 return false
@@ -1006,7 +1014,13 @@ async function hooker(event, params, plugin, func, args) {
         }
         console.log(error)
         let msg = TOOLS.formatLang(language.bugReport, language, [funcname, `${error.stack}`])
-        event.reply(msg)
+
+        if (event) {
+            event.reply(msg)
+        } else {
+            plugin.bot.sendPrivateMsg(plugin.mainAdmin, msg)
+        }
+
         plugin.logger.error(error)
         try {
             plugin.bot.sendPrivateMsg(authorQQ, `At ${new Date().getTime()}, funcname ${funcname}()\nbotQQ: ${plugin.bot.nickname} (${plugin.bot.uin})\nmainAdmin: ${await (await plugin.bot.getStrangerInfo(plugin.mainAdmin)).nickname} (${plugin.mainAdmin})\nPluginname: ${plugin.name}\nHostname: ${os.hostname()}\nSystem: ${os.platform()} ${os.release()} ${os.arch()}\nCPU: ${os.cpus()[0].model}\nMem: ${os.totalmem() / (1024 ** 3)} Gib\n${error.stack}`)
@@ -1047,7 +1061,7 @@ plugin.onMounted(async() => {
             // 什么也不干
         } else if (updateStatus === true) { // 更新成功
             let changeInfo = changes[version]
-            plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language, changeInfo != undefined ? changeInfo : ""))
+            plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language, changeInfo != undefined ? changeInfo : "-"))
         } else if (updateStatus === false) { // 更新失败
             plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateFailed, language))
         } else { // 更新状态获取失败
@@ -1057,7 +1071,7 @@ plugin.onMounted(async() => {
         plugin.saveConfig(config)
 
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, TOOLS.formatLang(language.welcome, language, await (Toys.getTotleDownloads(name)))) // 发送welcome信息
-        plugin.cron('*/10 * * * *', () => hooker(null, null, null, Update.checker)) // check update on every ten minutes
+        plugin.cron('*/10 * * * *', () => hooker(null, null, null, () => { Update.checker(false, true) })) // check update on every ten minutes
         plugin.on('message', (event, params) => hooker(event, params, plugin, Listener.main)) // 监听者
         plugin.onCmd(config.commands['/bkw'], (event, params) => hooker(event, params, plugin, Commands.bkw)) // 用于配置的命令
             // plugin.onCmd(config.commands['/bkwabout'], (event, params) => hooker(event, params, plugin, Commands.about)) // about
@@ -1068,7 +1082,7 @@ plugin.onMounted(async() => {
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, `At ${plugin.name}.onMounted Error: ${error.stack}`)
     }
     setTimeout(() => {
-            hooker(null, null, null, Update.checker) // check update
+            hooker(null, null, null, () => { Update.checker(false, true) }) // check update
         }, 10000) // 延时 10秒检查更新
 })
 
