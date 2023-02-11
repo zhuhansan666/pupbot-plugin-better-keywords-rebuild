@@ -347,11 +347,13 @@ var Manager = {
         }
 
         // 遍历ptype并添加保存配置文件
+        let added = false
         let ptypesMsg = []
         let unknownP = []
         for (let i = 0; i < ptype.length; i++) {
             keyname = permissonType[ptype[i]]
             if (keyname != undefined) {
+                added = true
                 if (keyname.code != 'groups') {
                     resultJson.value = result
                     config.keywords[keyname.code][name] = resultJson
@@ -377,15 +379,17 @@ var Manager = {
         if (unknownP.length > 0) {
             event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.warnings.unkonwnPg, undefined, arr = unknownP.join(', '), header = false)))
         }
-        return ptypesMsg.join(', ')
+        return added ? [true, ptypesMsg.join(', ')] : [false, "None"]
     },
     remove: function(name, ptype, event) {
         // 遍历ptype并添加删除配置文件
+        let removed = false
         let ptypesMsg = []
         let unknownP = []
         for (let i = 0; i < ptype.length; i++) {
             keyname = permissonType[ptype[i]]
             if (keyname != undefined) {
+                removed = true
                 if (keyname.code != 'groups') {
                     delete config.keywords[keyname.code][name]
                     let msg = keyname.msg[config.lang]
@@ -409,7 +413,7 @@ var Manager = {
         if (unknownP.length > 0) {
             event.reply(TOOLS.formatLang(language.warning, language, TOOLS.formatLang(language.warnings.unkonwnPg, undefined, arr = unknownP.join(', '), header = false)))
         }
-        return ptypesMsg.join(', ')
+        return removed ? [true, ptypesMsg.join(', ')] : [false, 'None']
     }
 }
 
@@ -446,9 +450,13 @@ var Commands = {
             if (permisson == '*') {
                 permisson = 'pufg'
             }
-            let permissonGroups = Manager.add(keyname, info, permisson, event)
+            let [status, permissonGroups] = Manager.add(keyname, info, permisson, event)
             plugin.saveConfig(config) // 保存配置文件
-            event.reply(TOOLS.formatLang(language.addSuccess, language, [keyname, permissonGroups]), true)
+            if (status) {
+                event.reply(TOOLS.formatLang(language.addSuccess, language, [keyname, permissonGroups]), true)
+            } else {
+                event.reply(TOOLS.formatLang(language.addFailed, language), true)
+            }
 
         } else if (command == 'rm') { // 删除
             let [_, permisson, keyname] = params
@@ -462,10 +470,13 @@ var Commands = {
             if (permisson == '*') {
                 permisson = 'pufg'
             }
-            let permissonGroups = Manager.remove(keyname, permisson, event)
+            let [status, permissonGroups] = Manager.remove(keyname, permisson, event)
             plugin.saveConfig(config) // 保存配置文件
-            event.reply(TOOLS.formatLang(language.rmSuccess, language, [keyname, permissonGroups]), true)
-
+            if (status) {
+                event.reply(TOOLS.formatLang(language.rmSuccess, language, [keyname, permissonGroups]), true)
+            } else {
+                event.reply(TOOLS.formatLang(language.rmFailed, language), true)
+            }
         } else if (command == 'about') { //关于
             Commands.about(event, params, plugin)
 
@@ -528,10 +539,13 @@ var Commands = {
             event.reply(TOOLS.formatLang(language.reloadFailed, language), true)
         } else if (command == 'up' || command == 'update') { //更新 
             event.reply(TOOLS.formatLang(language.updater.tip, language))
-            Update.checker(true)
+            Update.checker(true, false)
         } else if (command == 'as' || command == 'alias') { // 别名
             let _params = params.slice(1, params.length) // 更改格式 [botCmd, oldCmd, alias]
             Commands.changeCmd(event, _params, plugin) // 直接call chm
+        } else if (command == 'info' || command == 'updateinfo') { //更新内容
+            let changeInfo = changes[version]
+            event.reply(TOOLS.formatLang(language.updater.updateInfo, language, changeInfo != undefined ? changeInfo : "-"))
         } else {
             event.reply(TOOLS.formatLang(language.error, language, TOOLS.formatLang(language.errors.unknownCmd, undefined, command, false)))
         }
@@ -1000,11 +1014,18 @@ plugin.onMounted(async() => {
         } else if (updateStatus === true) { // 更新成功
             let changeInfo = changes[version]
             plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateSuccess, language, changeInfo != undefined ? changeInfo : "-"))
+            setTimeout(() => {
+                    hooker(null, null, null, () => { Update.checker(false, true) }) // check update
+                }, 15000) // 延时 15秒检查更新
         } else if (updateStatus === false) { // 更新失败
             plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.updateFailed, language))
         } else { // 更新状态获取失败
             plugin.bot.sendPrivateMsg(mainAdmin, TOOLS.formatLang(language.updater.unknownStatus, language))
+            setTimeout(() => {
+                    hooker(null, null, null, () => { Update.checker(false, true) }) // check update
+                }, 15000) // 延时 15秒检查更新
         }
+
         config.updateAtLast = { 'status': false, 'success': false } // 重写更新状态
         plugin.saveConfig(config)
 
@@ -1019,9 +1040,6 @@ plugin.onMounted(async() => {
         console.log(`At ${plugin.name}.onMounted Error: ${error.stack}`)
         plugin.bot.sendPrivateMsg(plugin.mainAdmin, `At ${plugin.name}.onMounted Error: ${error.stack}`)
     }
-    setTimeout(() => {
-            hooker(null, null, null, () => { Update.checker(false, true) }) // check update
-        }, 10000) // 延时 10秒检查更新
 })
 
 module.exports = { plugin }

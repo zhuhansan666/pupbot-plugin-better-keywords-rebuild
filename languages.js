@@ -5,7 +5,7 @@ const languages = {
         header: '〓 {pn} 〓',
         bugReport: "是谁都可能会遇到困难的...\n尝试运行函数 {0} 发生了没有预料的错误:\n{1}\n(如有需要请发送邮件至开发者 public.zhuhansan666@outlook.com 备注 {pn}:bug)",
         welcome: "欢迎使用 {pn} - {pv}, 您与{0}人做出了同样的选择\n使用 /bkw lang set <语言代号> 设置语言",
-        help: "帮助菜单\n\t/bkw alias 或 as add/remove/a/rm <原命令> <别名> -> 新增/删除命令别名\n\t/bkw update 或 up -> 检查更新\n\t/bkw reload 或 rl -> 重载插件\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
+        help: "帮助菜单\n\t/bkw info 或 updateinfo -> 查看当前版本更新内容\n\t/bkw alias 或 as add/remove/a/rm <原命令> <别名> -> 新增/删除命令别名\n\t/bkw update 或 up -> 检查更新\n\t/bkw reload 或 rl -> 重载插件\n\t/bkw about -> 关于信息\n\t/bkw lang [list -> 支持的语言列表;][set -> 设置指定语言(立即生效);]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定义回复\n\t/bkw rm <permissonGroup> <keyword> -> 删除自定义回复\n\tpermissonGroup: p -> 当前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全局)\n\tinfo特殊内容:+f -> 开启模糊匹配 -f -> 关闭模糊匹配",
         error: "运行发生错误: {0}",
         errors: {
             missArgv: "缺少参数",
@@ -21,7 +21,9 @@ const languages = {
             unkonwnPg: "未知的(多个)权限组: {0}"
         },
         addSuccess: "关键词 {0} (权限组: {1})添加成功",
+        addFailed: "关键词添加失败",
         rmSuccess: "关键词 {0} (权限组: {1})移除成功",
+        rmFailed: "关键词移除失败",
         about: "感谢您使用 {pn} for {0}, 本插件用于提升 keywords 功能\n作者: 爱喝牛奶の涛哥, 当前版本: {pv}\n开源地址:{1}",
         success: "{0} 成功",
         reload: "尝试重加载插件",
@@ -47,6 +49,7 @@ const languages = {
             updateFailed: "插件更新失败, 错误见运行日志, 当前插件版本: {pv}",
             unknownStatus: "插件更新状态获取失败",
             tip: "正在检查更新...详见私信",
+            updateInfo: "当前版本: {pv}\n更新内容:\n{0}"
         },
         languages: {
             unknownLang: "未知的语言: {0}, 请检查输入是否正确",
@@ -58,7 +61,7 @@ const languages = {
         header: '〓 {pn} 〓',
         bugReport: "是誰都可能會遇到困難的...\n嘗試運行函數 {0} 發生了沒有預料的錯誤:\n{1}\n(如有需要請發送郵件至開發者 public.zhuhansan666@outlook.com 備註 {pn}:bug)",
         welcome: "歡迎使用{pn} - {pv}, 您與{0}人做出了同樣的選擇\n使用/bkw lang set <語言代號> 設定語言",
-        help: "幫助功能表\n\t/bkw update 或 up ->檢查更新\n\t/bkw reload 或 rl ->重載外掛程式\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
+        help: "幫助功能表\n\t/bkw info 或 updateinfo -> 查看当前版本更新内容\n\t/bkw update 或 up ->檢查更新\n\t/bkw reload 或 rl ->重載外掛程式\n\t/bkw about -> 關於資訊\n\t/bkw lang [list -> 支援的語言清單;][set -> 設定指定語言(立即生效;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> 增加自定義回復\n\t/bkw rm <permissonGroup> <keyword> -> 刪除自定義回復\n\tpermissonGroup: p -> 當前群聊; u -> 所有群聊; f -> 所有私信; g -> 所有群聊和私信(全域)\n\tinfo特殊内容:+f -> 開啟模糊匹配 -f -> 關閉模糊匹配",
         error: "執行發生錯誤: {0}",
         errors: {
             missArgv: "缺少參數",
@@ -74,7 +77,9 @@ const languages = {
             unkonwnPg: "未知的(多個)許可權組: {0}"
         },
         addSuccess: "關鍵詞 {0} (許可權組: {1})添加成功",
+        addFailed: "關鍵字添加失敗",
         rmSuccess: "關鍵詞 {0} (許可權組: {1})移除成功",
+        rmFailed: "關鍵字移除失敗",
         about: "感謝您使用 {pn} for {0}, 本外掛程式用於提升 keywords 功能\n作者: 愛喝牛奶の濤哥, 當前版本: {pv}\n開源位址:{1}",
         success: "{0} 成功",
         reload: "嘗試重載入外掛程式",
@@ -100,6 +105,7 @@ const languages = {
             updateFailed: "外掛程式更新失敗, 錯誤見運行日誌, 當前外掛程式版本: {pv}",
             unknownStatus: "外掛程式更新狀態獲取失敗",
             tip: "正在檢查更新...詳見私信",
+            updateInfo: "當前版本: {pv}\n更新內容:\n{0}"
         },
         languages: {
             unknownLang: "未知的語言: {0}, 請檢查輸入是否正確",
@@ -111,7 +117,7 @@ const languages = {
         header: "〓 {pn} 〓",
         bugReport: "Anyone may encounter difficulties...\nWhen try to run function {0}, an unexpected mistake has occurred:\n{1}\n(if necessary, please send email to developer public.zhuhansan666@outlook.com remarks {pn}: bug)",
         welcome: "Welcome to use the plugin {pn} - {pv}, You made the same choice as {0} people.\nUse /bkw lang set <language-code> to set the language.",
-        help: "Help menu\n\t/bkw update or up -> check for updates\n\t/bkw reload or rl -> reload\n\t/bkw about -> about information\n\t/bkw lang [list -> show languages;][set -> set language;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <permissonGroup> <keyword> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)\n\tinfo Special content :+f -> Turn on fuzzy matching -f -> Turn off fuzzy matching",
+        help: "Help menu\n\t/bkw info or updateinfo -> View the updated content of the current version\n\t/bkw update or up -> check for updates\n\t/bkw reload or rl -> reload\n\t/bkw about -> about information\n\t/bkw lang [list -> show languages;][set -> set language;]\n\t/bkw add <permissonGroup> <keyword> <infoPart1> <infoPart2> <...> -> to add custom reply\n\t/bkw rm <permissonGroup> <keyword> -> to remove custom reply\n\tpermissonGroup: p -> this group; u -> all groups; f -> all friends; g -> all groups and friends(global)\n\tinfo Special content :+f -> Turn on fuzzy matching -f -> Turn off fuzzy matching",
         error: "ERROR: {0}",
         errors: {
             missArgv: "missing parameter",
@@ -127,7 +133,9 @@ const languages = {
             unkonwnPg: "Unknown (multiple) permission groups: {0}"
         },
         addSuccess: "Add keyword {0} (permisson group: {1}) success",
+        addFailed: "Add keyword failed",
         rmSuccess: "Remove keyword {0} (permisson group: {1}) success",
+        rmFailed: "Remove keyword failed",
         about: "Thanks for your using plugin {pn} for {0}, this plugin will be keywords better than better!\nAuthor: 爱喝牛奶の涛哥 / LoveMilk · BrotherTao, version: {pv}\nOpen source:{1}",
         success: "{0} successd",
         reload: "Try to reload plugin.",
@@ -153,6 +161,7 @@ const languages = {
             updateFailed: "The plugin update failed. See the operation log for the error. Current plugin version: {pv}",
             unknownStatus: "Plugin update status acquisition failed",
             tip: "Checking for updates...if you want to get info, you must see private messages",
+            updateInfo: "Current version: {pv}\nUpdate info:\n{0}"
         },
         languages: {
             unknownLang: "Unknown language: {0}, place check the input!",
