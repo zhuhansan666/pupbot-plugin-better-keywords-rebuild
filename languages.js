@@ -89,7 +89,7 @@ const languages = {
             targetUnexist: "{0} 不在 {1} 別名中",
         },
         updater: {
-            try: "嘗試更新外掛程式 ({pv} -> {0})\n將會在更新完成後自動重載(出錯會自動提示)",
+            try: "嘗試更新外掛程式 ({pv} -> {0})\n將會在更新完成後自動重載(出錯會自動提示)\n海内存知己, 天涯若比鄰\n    請不要關閉電腦\n這可能需要幾個世紀, 請坐和放寬",
             isUpdating: "已有一個更新函數運行, 本函數已退出",
             isLatest: "您是最新的!\n當前外掛程式已為最新版本 (當前外掛程式版本：{pv})\n注：外掛程式版本高於最新版本也會顯示本消息",
             installFailed: "安裝外掛程式時發生錯誤, 詳情見錯誤紀錄",
@@ -142,7 +142,7 @@ const languages = {
             targetUnexist: "{0} is not in {1} alias",
         },
         updater: {
-            try: "try to update plugin ({pv} -> {0})\nIt will auto reload when install update successful(If error in this, it will auto send message to you)",
+            try: "try to update plugin ({pv} -> {0})\nIt will auto reload when install update successful(If error in this, it will auto send message to you)\nGood friends are good friends no matter how far away they are from each other.\n    Please don't turn off your computer.\nThis may take several centuries, please sit down and relax.",
             isUpdating: "There is already an update function running, this function has exited.",
             isLatest: "You are the latest!\nThe current plugin is the latest version (current plug-in version: {pv})\nNotes: This message will also be displayed if the plugin version is higher than the latest version",
             installFailed: "Try to install plugin error, see the error log for details",

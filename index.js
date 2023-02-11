@@ -687,7 +687,7 @@ var Listener = {
         }
     },
     _privateMessage: async function(event, params, plugin) {
-        let rawMessage = event.raw_message
+        let rawMessage = event.toString()
         let globalFriends = config.keywords['global-f']
         for (let key in globalFriends) {
             let value = globalFriends[key]
@@ -728,7 +728,7 @@ var Listener = {
         delete global
     },
     _groupMessage: async function(event, params, plugin) {
-        let rawMessage = event.raw_message
+        let rawMessage = event.toString()
         let groupObject = config.keywords.groups[event.group_id]
         if (groupObject != undefined) {
             for (key in groupObject) {
@@ -789,70 +789,6 @@ var Listener = {
         }
 
         delete global
-    },
-    _privateMessage_old: async function(event, params, plugin) {
-        let rawMessage = event.raw_message
-        let globalFriendsValue = config.keywords['global-f'][rawMessage]
-        if (globalFriendsValue != undefined) {
-            try {
-                await Listener._sendMessage(event, globalFriendsValue.value)
-            } catch (error) {
-                plugin.logger.error(error)
-            }
-            return
-        }
-
-        delete globalFriendsValue
-
-        let globalValue = config.keywords.global[rawMessage]
-        if (globalValue != undefined) {
-            try {
-                await Listener._sendMessage(event, globalValue.value)
-            } catch (error) {
-                plugin.logger.error(error)
-            }
-            return
-        }
-    },
-    _groupMessage_old: async function(event, params, plugin) {
-        let rawMessage = event.raw_message
-        let groupObject = config.keywords.groups[event.group_id]
-        if (groupObject != undefined) {
-            let groupValue = groupObject[rawMessage]
-            if (groupValue != undefined) {
-                try {
-                    await Listener._sendMessage(event, groupValue.value)
-                } catch (error) {
-                    plugin.logger.error(error)
-                }
-                return
-            }
-            delete groupValue
-        }
-
-        delete groupObject
-
-        let globalGroupsValue = config.keywords['global-g'][rawMessage]
-        if (globalGroupsValue != undefined) {
-            try {
-                await Listener._sendMessage(event, globalGroupsValue.value)
-            } catch (error) {
-                plugin.logger.error(error)
-            }
-            return
-        }
-
-        delete globalGroupsValue
-
-        let globalValue = config.keywords.global[rawMessage]
-        if (globalValue != undefined) {
-            try {
-                await Listener._sendMessage(event, globalValue.value)
-            } catch (error) {
-                plugin.logger.error(error)
-            }
-            return
-        }
     },
     main: async function(event, params, plugin) {
         if (event.message_type == 'group') {
